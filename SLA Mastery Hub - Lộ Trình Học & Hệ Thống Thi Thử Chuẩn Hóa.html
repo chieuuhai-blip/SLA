@@ -1,0 +1,2798 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="artifact-type" content="tool">
+  <meta name="design-style" content="carbon">
+  <title>SLA Mastery Hub — Lộ Trình Học & Hệ Thống Thi Thử Chuẩn Hóa</title>
+
+  <!-- Google Fonts: Be Vietnam Pro & JetBrains Mono (Chuẩn Tiếng Việt 100%) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS v3.4.17 -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+
+  <!-- Lucide Icons v1.43.0 -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+
+  <style>
+    :root {
+      --font-sans: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      
+      --background: #f8fafc;
+      --surface: #ffffff;
+      --surface-subtle: #f1f5f9;
+      --surface-high: #e2e8f0;
+      
+      --on-surface: #0f172a;
+      --on-surface-variant: #475569;
+      --on-surface-subtle: #64748b;
+      
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --primary-container: #eff6ff;
+      --primary-border: #bfdbfe;
+      
+      --success: #15803d;
+      --success-container: #f0fdf4;
+      --success-border: #bbf7d0;
+      
+      --danger: #b91c1c;
+      --danger-container: #fef2f2;
+      --danger-border: #fecaca;
+      
+      --warning: #b45309;
+      --warning-container: #fffbeb;
+      --warning-border: #fde68a;
+
+      --outline: #cbd5e1;
+      --outline-variant: #e2e8f0;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      font-family: var(--font-sans);
+      background-color: var(--background);
+      color: var(--on-surface);
+      margin: 0;
+      padding: 0;
+      overflow-x: clip;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .font-mono-numbers {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Pulse animation for critical timer */
+    @keyframes timerAlert {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.02); }
+    }
+    .animate-timer-alert {
+      animation: timerAlert 1s infinite ease-in-out;
+    }
+
+    .tab-btn { white-space: nowrap; flex-shrink: 0; }
+    :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+    .tab-btn.active {
+      background-color: #ffffff;
+      color: #1e40af;
+      border-bottom: 2px solid #1e40af;
+      font-weight: 600;
+    }
+
+    /* Option selection state */
+    .option-card {
+      transition: all 0.15s ease-in-out;
+    }
+    .option-card:hover {
+      border-color: #93c5fd;
+      background-color: #f8fafc;
+    }
+    .option-card.selected {
+      border-color: #2563eb;
+      background-color: #eff6ff;
+      box-shadow: 0 0 0 1px #2563eb;
+    }
+
+    /* Question status pill */
+    .q-pill {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 0.825rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      cursor: pointer;
+      position: relative;
+    }
+    .q-pill.current {
+      box-shadow: 0 0 0 2px #1e40af;
+      font-weight: 700;
+    }
+    .q-pill.answered {
+      background-color: #1e40af;
+      color: #ffffff;
+    }
+    .q-pill.unanswered {
+      background-color: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+    .q-pill.flagged::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 8px;
+      height: 8px;
+      background-color: #f59e0b;
+      border-radius: 50%;
+      border: 1.5px solid #ffffff;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Màn hình nhập mã truy cập -->
+  <div id="gate" style="position:fixed;inset:0;z-index:9999;background:#f8fafc;display:flex;align-items:center;justify-content:center;padding:24px;font-family:var(--font-sans);">
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:32px 24px;width:100%;max-width:360px;text-align:center;box-shadow:0 4px 24px rgba(15,23,42,0.06);">
+      <div style="width:48px;height:48px;margin:0 auto 16px;border-radius:12px;background:#1e40af;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;">🔒</div>
+      <h2 style="margin:0 0 6px;font-size:18px;font-weight:700;color:#0f172a;">SLA Mastery Hub</h2>
+      <p style="margin:0 0 20px;font-size:14px;color:#64748b;">Nhập mã truy cập để vào xem</p>
+      <input id="gate-input" type="password" placeholder="Mã truy cập" autocomplete="off" style="width:100%;padding:12px 14px;font-size:16px;border:1px solid #cbd5e1;border-radius:10px;outline:none;font-family:inherit;">
+      <p id="gate-error" style="min-height:20px;margin:8px 0 0;font-size:13px;color:#b91c1c;"></p>
+      <button id="gate-btn" style="width:100%;margin-top:4px;padding:12px;font-size:15px;font-weight:600;color:#fff;background:#1e40af;border:0;border-radius:10px;cursor:pointer;font-family:inherit;">Vào xem</button>
+    </div>
+  </div>
+
+  <!-- Top Global Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between sm:h-16 py-2 sm:py-0 gap-2">
+        <!-- Logo & Title -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-lg bg-blue-800 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+            <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h1 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight">SLA Mastery Hub</h1>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-medium">Bilingual Ed.</span>
+            </div>
+            <p class="text-xs text-slate-500 hidden sm:block">Lộ trình nghiên cứu Thụ đắc Ngôn ngữ thứ hai & Hệ thống Đề thi thử chuẩn hóa</p>
+          </div>
+        </div>
+
+        <!-- Global Navigation Tabs -->
+        <nav class="flex items-center space-x-1 sm:space-x-2 overflow-x-auto max-w-full">
+          <button onclick="switchTab('roadmap')" id="nav-roadmap" class="tab-btn active px-3 py-2 text-xs sm:text-sm font-medium rounded-md text-slate-700 hover:text-blue-700 flex items-center space-x-1.5">
+            <i data-lucide="map" class="w-4 h-4"></i>
+            <span>Lộ trình học</span>
+          </button>
+          <button onclick="switchTab('glossary')" id="nav-glossary" class="tab-btn px-3 py-2 text-xs sm:text-sm font-medium rounded-md text-slate-700 hover:text-blue-700 flex items-center space-x-1.5">
+            <i data-lucide="book-marked" class="w-4 h-4"></i>
+            <span>Từ điển thuật ngữ</span>
+          </button>
+          <button onclick="switchTab('exams')" id="nav-exams" class="tab-btn px-3 py-2 text-xs sm:text-sm font-medium rounded-md text-slate-700 hover:text-blue-700 flex items-center space-x-1.5">
+            <i data-lucide="file-check" class="w-4 h-4"></i>
+            <span>Phòng thi thử</span>
+            <span class="ml-1 px-1.5 py-0.2 bg-blue-100 text-blue-800 text-[10px] rounded-full font-mono">8 Đề</span>
+          </button>
+          <button onclick="switchTab('history')" id="nav-history" class="tab-btn px-3 py-2 text-xs sm:text-sm font-medium rounded-md text-slate-700 hover:text-blue-700 flex items-center space-x-1.5">
+            <i data-lucide="award" class="w-4 h-4"></i>
+            <span>Bảng điểm</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: LỘ TRÌNH HỌC SLA CHUYÊN SÂU        -->
+    <!-- ========================================== -->
+    <section id="section-roadmap" class="space-y-6">
+
+      <!-- ============================================================== -->
+      <!-- KHỐI ĐẾM NGƯỢC THỜI GIAN THI (CHÈN VÀO KHOẢNG TRẮNG)         -->
+      <!-- ============================================================== -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 sm:p-6 flex flex-col lg:flex-row items-center justify-between gap-6 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-bl-full -z-10 opacity-70"></div>
+        <div class="absolute bottom-0 left-0 w-32 h-32 bg-red-50 rounded-tr-full -z-10 opacity-50"></div>
+
+        <!-- Bên Trái: Thông tin phòng thi & Lời chúc -->
+        <div class="flex-1 w-full text-center lg:text-left">
+          <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 mb-4">
+            <h3 class="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="timer" class="w-6 h-6 text-blue-700"></i>
+              <span>Đếm Ngược KTHP môn SLA</span>
+            </h3>
+            <span class="px-3 py-1 rounded-md bg-red-100 text-red-800 text-xs font-bold animate-pulse inline-block">21/12/2026</span>
+          </div>
+          
+          <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 text-sm text-slate-700 font-medium mb-4">
+            <div class="flex items-center space-x-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+              <i data-lucide="map-pin" class="w-4 h-4 text-slate-500"></i>
+              <span>Phòng: <strong class="text-blue-800">PM06</strong></span>
+            </div>
+            <div class="flex items-center space-x-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+              <i data-lucide="building" class="w-4 h-4 text-slate-500"></i>
+              <span>Cơ sở: <strong class="text-blue-800">Sư Vạn Hạnh</strong></span>
+            </div>
+            <div class="flex items-center space-x-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+              <i data-lucide="clock" class="w-4 h-4 text-slate-500"></i>
+              <span>Giờ: <strong class="text-blue-800">10h30</strong></span>
+            </div>
+          </div>
+          
+          <p class="text-sm text-slate-600 italic border-l-4 border-blue-600 pl-3 py-1.5 bg-gradient-to-r from-blue-50 to-transparent inline-block font-medium">
+            "Kỷ luật là cầu nối giữa mục tiêu và thành tựu. Chúc bạn tự tin bước vào phòng thi và đạt kết quả tốt nhất!"
+          </p>
+        </div>
+
+        <!-- Bên Phải: Đồng hồ đếm ngược -->
+        <div class="flex gap-2 sm:gap-3 shrink-0">
+          <div class="bg-white border border-slate-200 shadow-sm rounded-lg w-16 sm:w-20 py-3 text-center">
+            <span id="cd-days" class="block text-2xl sm:text-3xl font-extrabold text-blue-800 font-mono-numbers">00</span>
+            <span class="text-[10px] sm:text-xs text-slate-500 font-semibold uppercase tracking-wider block mt-1">Ngày</span>
+          </div>
+          <div class="bg-white border border-slate-200 shadow-sm rounded-lg w-16 sm:w-20 py-3 text-center">
+            <span id="cd-hours" class="block text-2xl sm:text-3xl font-extrabold text-blue-800 font-mono-numbers">00</span>
+            <span class="text-[10px] sm:text-xs text-slate-500 font-semibold uppercase tracking-wider block mt-1">Giờ</span>
+          </div>
+          <div class="bg-white border border-slate-200 shadow-sm rounded-lg w-16 sm:w-20 py-3 text-center">
+            <span id="cd-mins" class="block text-2xl sm:text-3xl font-extrabold text-blue-800 font-mono-numbers">00</span>
+            <span class="text-[10px] sm:text-xs text-slate-500 font-semibold uppercase tracking-wider block mt-1">Phút</span>
+          </div>
+          <div class="bg-white border border-slate-200 shadow-sm rounded-lg w-16 sm:w-20 py-3 text-center">
+            <span id="cd-secs" class="block text-2xl sm:text-3xl font-extrabold text-red-600 font-mono-numbers animate-pulse">00</span>
+            <span class="text-[10px] sm:text-xs text-slate-500 font-semibold uppercase tracking-wider block mt-1">Giây</span>
+          </div>
+        </div>
+      </div>
+      <!-- ============================================================== -->
+
+      <!-- Roadmap Hero Banner -->
+      <div class="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-xl p-6 sm:p-8 text-white shadow-md relative overflow-hidden">
+        <div class="relative z-10 max-w-3xl">
+          <span class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-blue-800/80 text-blue-200 text-xs font-medium mb-3">
+            <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+            <span>Cấu trúc lý thuyết toàn diện</span>
+          </span>
+          <h2 class="text-xl sm:text-2xl font-bold tracking-tight mb-2">Lộ Trình Thụ Đắc Ngôn Ngữ Thứ Hai (SLA)</h2>
+          <p class="text-sm text-blue-100 leading-relaxed mb-4">
+            Khung kiến thức chuẩn hóa từ các học giả hàng đầu (Krashen, Long, Swain, VanPatten, ACTFL). Nắm vững bản chất tiếp thu ngầm (implicit acquisition), vai trò của đầu vào (Input), tương tác (Interaction), đầu ra (Output) và phương pháp đánh giá IPA.
+          </p>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <span class="bg-white/10 px-3 py-1 rounded-full border border-white/10">7 Chặng học tập</span>
+            <span class="bg-white/10 px-3 py-1 rounded-full border border-white/10">Song ngữ Anh - Việt</span>
+            <span class="bg-white/10 px-3 py-1 rounded-full border border-white/10">Bộ câu hỏi trắc nghiệm kèm theo</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Khối Checklist Card -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex flex-col w-full">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+            <i data-lucide="list-checks" class="w-5 h-5 text-blue-700"></i>
+            <span>Checklist ôn tập KTHP</span>
+          </h3>
+          <span id="checklist-progress-text" class="text-sm font-bold text-blue-700 font-mono-numbers">0%</span>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="w-full bg-slate-100 rounded-full h-2.5 mb-5 overflow-hidden border border-slate-200">
+          <div id="checklist-progress-bar" class="bg-blue-600 h-full rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+        </div>
+
+        <!-- Tasks List -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="checklist-container">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Roadmap Navigation Stage Chips -->
+      <div class="flex overflow-x-auto space-x-2 pb-2 scrollbar-none text-xs sm:text-sm">
+        <button onclick="filterRoadmap('all')" class="roadmap-filter-btn px-3 py-1.5 rounded-lg bg-slate-900 text-white font-medium whitespace-nowrap" data-stage="all">Toàn bộ 7 Chặng</button>
+        <button onclick="filterRoadmap('intro')" class="roadmap-filter-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium whitespace-nowrap" data-stage="intro">Giai đoạn 0: Introduction</button>
+        <button onclick="filterRoadmap('c1')" class="roadmap-filter-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium whitespace-nowrap" data-stage="c1">Chương 1: Nguyên tắc Cốt lõi</button>
+        <button onclick="filterRoadmap('c2')" class="roadmap-filter-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium whitespace-nowrap" data-stage="c2">Chương 2: Mục tiêu & IPA</button>
+        <button onclick="filterRoadmap('c2s2')" class="roadmap-filter-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium whitespace-nowrap" data-stage="c2s2">Chương 2 (S2): Dữ liệu & Nghiên cứu</button>
+        <button onclick="filterRoadmap('c3')" class="roadmap-filter-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium whitespace-nowrap" data-stage="c3">Chương 3: Input & i+1</button>
+        <button onclick="filterRoadmap('c4')" class="roadmap-filter-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium whitespace-nowrap" data-stage="c4">Chương 4: Năng lực Diễn giải</button>
+        <button onclick="filterRoadmap('c5c6')" class="roadmap-filter-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium whitespace-nowrap" data-stage="c5c6">Chương 5 & 6: Output & TBLT</button>
+      </div>
+
+      <!-- Roadmap Timeline Container -->
+      <div id="roadmap-timeline" class="space-y-4">
+        <!-- Stages will be populated dynamically or static rich templates -->
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: TỪ ĐIỂN THUẬT NGỮ SLA SONG NGỮ     -->
+    <!-- ========================================== -->
+    <section id="section-glossary" class="hidden space-y-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+            <i data-lucide="library" class="w-5 h-5 text-blue-700"></i>
+            <span>Từ Điển Thuật Ngữ SLA (Bilingual Glossary)</span>
+          </h2>
+          <p class="text-xs text-slate-500 mt-1">Trích xuất chuẩn xác từ Phụ lục thuật ngữ SLA (Appendix 1) và giáo trình học phần.</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <div class="relative w-full md:w-72">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="glossary-search" oninput="filterGlossary()" placeholder="Tìm theo thuật ngữ, viết tắt, định nghĩa..." class="w-full pl-9 pr-3 py-1.5 text-xs sm:text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+          </div>
+          <select id="glossary-category" onchange="filterGlossary()" class="text-xs sm:text-sm py-1.5 px-3 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600">
+            <option value="all">Tất cả nhóm</option>
+            <option value="hypothesis">Giả thuyết & Lý thuyết</option>
+            <option value="system">Hệ thống & Năng lực</option>
+            <option value="pedagogy">Phương pháp & Giảng dạy</option>
+            <option value="linguistics">Ngôn ngữ học đại cương</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="glossary-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: PHÒNG THI THỬ & LUYỆN ĐỀ CHUẨN HÓA  -->
+    <!-- ========================================== -->
+    <section id="section-exams" class="hidden space-y-6">
+
+      <!-- SUBVIEW A: EXAM HUB (DANH SÁCH BỘ ĐỀ THI) -->
+      <div id="exam-view-hub" class="space-y-6">
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+              <i data-lucide="layers" class="w-5 h-5 text-blue-700"></i>
+              <span>Trung Tâm Đề Thi Thử SLA Chuẩn Hóa</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">Thời gian làm bài chuẩn quy ước: <span class="font-semibold text-blue-800">1 phút cho 1 câu hỏi</span>. Đồng hồ chỉ kích hoạt khi bấm "Bắt đầu làm bài".</p>
+          </div>
+          <!-- Filter chips by question count / duration -->
+          <div class="flex flex-wrap gap-1.5">
+            <button onclick="filterExams('all')" class="exam-filter-chip px-3 py-1 rounded-md text-xs font-medium bg-slate-900 text-white" data-filter="all">Tất cả (8 đề)</button>
+            <button onclick="filterExams('60')" class="exam-filter-chip px-3 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200" data-filter="60">60 Câu / 60 Phút</button>
+            <button onclick="filterExams('50')" class="exam-filter-chip px-3 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200" data-filter="50">50 Câu / 50 Phút</button>
+            <button onclick="filterExams('45')" class="exam-filter-chip px-3 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200" data-filter="45">45 Câu / 45 Phút</button>
+            <button onclick="filterExams('40')" class="exam-filter-chip px-3 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200" data-filter="40">40 Câu / 40 Phút</button>
+            <button onclick="filterExams('short')" class="exam-filter-chip px-3 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200" data-filter="short">Đề Chuyên đề (25-30p)</button>
+          </div>
+        </div>
+
+        <!-- Exam Cards Grid -->
+        <div id="exams-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- SUBVIEW B: EXAM BRIEFING / CHUẨN BỊ (ĐỒNG HỒ TUYỆT ĐỐI CHƯA CHẠY) -->
+      <div id="exam-view-briefing" class="hidden max-w-3xl mx-auto space-y-6">
+        <button onclick="exitToHub()" class="inline-flex items-center space-x-1.5 text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Quay lại danh sách đề</span>
+        </button>
+
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+          <div class="border-b border-slate-200 pb-5">
+            <div class="flex items-center space-x-2 text-xs font-semibold text-blue-700 uppercase tracking-wider mb-1" id="briefing-chapter-badge">
+              Chương 1 • Guiding Principles
+            </div>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900" id="briefing-title">Đề Thi Thử Chuẩn 60 Câu - Nguyên Tắc Cốt Lõi</h2>
+            <p class="text-sm text-slate-600 mt-2" id="briefing-desc">Đánh giá toàn diện kiến thức về quá trình tiếp thu ngầm (implicit acquisition), vai trò của input và output, 3 chế độ giao tiếp và so sánh L1 - L2+.</p>
+          </div>
+
+          <!-- Exam Metrics Banner -->
+          <div class="grid grid-cols-3 gap-3 bg-slate-50 rounded-lg p-4 text-center border border-slate-200">
+            <div>
+              <span class="block text-xs text-slate-500 font-medium">Số lượng câu hỏi</span>
+              <span class="text-xl sm:text-2xl font-bold text-slate-900 font-mono-numbers" id="briefing-qcount">60 Câu</span>
+            </div>
+            <div>
+              <span class="block text-xs text-slate-500 font-medium">Thời gian quy định</span>
+              <span class="text-xl sm:text-2xl font-bold text-blue-800 font-mono-numbers" id="briefing-duration">60 Phút</span>
+            </div>
+            <div>
+              <span class="block text-xs text-slate-500 font-medium">Định mức chuẩn</span>
+              <span class="text-xl sm:text-2xl font-bold text-slate-900 font-mono-numbers">1p / câu</span>
+            </div>
+          </div>
+
+          <!-- Crucial Clock Notice Box -->
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-xs sm:text-sm text-amber-900 space-y-2">
+            <div class="flex items-center space-x-2 font-bold text-amber-800">
+              <i data-lucide="clock-alert" class="w-4 h-4 text-amber-600"></i>
+              <span>CƠ CHẾ TÍNH GIỜ & QUY CHẾ LÀM BÀI</span>
+            </div>
+            <ul class="list-disc list-inside space-y-1 text-slate-700 text-xs sm:text-sm leading-relaxed">
+              <li><strong>Thời gian chưa bắt đầu:</strong> Đồng hồ đếm ngược <strong>tuyệt đối không tự chạy</strong> trong màn hình này.</li>
+              <li>Đồng hồ chỉ chính thức bắt đầu đếm ngược từng giây khi bạn nhấn nút <strong>"BẮT ĐẦU LÀM BÀI"</strong> màu xanh bên dưới.</li>
+              <li>Bạn có thể gắn cờ (<i data-lucide="flag" class="w-3.5 h-3.5 inline text-amber-500"></i>) các câu hỏi phân vân để quay lại kiểm tra nhanh bằng Bảng câu hỏi.</li>
+              <li>Hệ thống hỗ trợ bật/tắt bản dịch tiếng Việt song ngữ để hỗ trợ việc tra cứu và đối chiếu lý thuyết.</li>
+              <li>Khi hết thời gian quy định, bài thi sẽ tự động được thu và chấm điểm ngay lập tức.</li>
+            </ul>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-slate-200">
+            <button onclick="exitToHub()" class="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 text-sm font-medium transition">
+              Quay lại danh sách đề
+            </button>
+            <button onclick="startActiveExam()" class="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-blue-800 hover:bg-blue-900 text-white text-sm font-semibold shadow-sm transition flex items-center justify-center space-x-2">
+              <i data-lucide="play" class="w-4 h-4"></i>
+              <span>BẮT ĐẦU LÀM BÀI</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBVIEW C: LIVE EXAM TAKING VIEW (GIAO DIỆN LÀM BÀI - ĐỒNG HỒ ĐANG CHẠY) -->
+      <div id="exam-view-taking" class="hidden space-y-4">
+        
+        <!-- Sticky Live Exam Top Bar -->
+        <div class="bg-white border border-slate-200 rounded-xl p-3 sm:p-4 shadow-sm flex items-center justify-between gap-4 sticky top-18 z-30">
+          <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-800 flex items-center justify-center font-bold text-sm">
+              <i data-lucide="file-text" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-xs sm:text-sm font-bold text-slate-900 truncate max-w-[200px] sm:max-w-md" id="live-exam-title">Đề thi đang làm</h3>
+              <p class="text-xs text-slate-500">
+                Câu đang xem: <span class="font-bold text-slate-800" id="live-exam-qindicator">1 / 60</span> • Đã làm: <span class="font-semibold text-blue-700" id="live-answered-count">0</span> câu
+              </p>
+            </div>
+          </div>
+
+          <!-- Center Live Countdown Timer Badge -->
+          <div class="flex items-center space-x-3">
+            <div id="timer-badge" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-white font-mono-numbers font-bold text-base sm:text-lg border border-slate-700 shadow-inner">
+              <i data-lucide="clock" class="w-4 h-4 text-slate-300"></i>
+              <span id="timer-display">40:00</span>
+            </div>
+            <button onclick="confirmSubmitExam()" class="px-3 sm:px-4 py-2 rounded-lg bg-green-700 hover:bg-green-800 text-white text-xs sm:text-sm font-semibold shadow-xs flex items-center space-x-1.5 transition">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span class="hidden sm:inline">Nộp bài thi</span>
+              <span class="sm:hidden">Nộp bài</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Main Question Canvas & Navigation Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          
+          <!-- Question Canvas (Left 3 cols) -->
+          <div class="lg:col-span-3 space-y-4">
+            <div class="bg-white rounded-xl border border-slate-200 p-5 sm:p-7 shadow-xs space-y-5">
+              
+              <!-- Question Meta & Flag Button -->
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center space-x-2">
+                  <span class="px-2.5 py-1 rounded-md bg-blue-100 text-blue-800 font-bold text-xs font-mono" id="current-q-badge">CÂU 1</span>
+                  <span class="text-xs text-slate-500 font-medium" id="current-q-topic">Chuyên đề SLA</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <button onclick="toggleVietnameseTranslation()" class="px-2.5 py-1 rounded text-xs border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center space-x-1" title="Ẩn/Hiện bản dịch tiếng Việt">
+                    <i data-lucide="languages" class="w-3.5 h-3.5"></i>
+                    <span id="trans-toggle-label">Ẩn tiếng Việt</span>
+                  </button>
+                  <button onclick="toggleFlagCurrentQuestion()" id="flag-btn" class="px-2.5 py-1 rounded text-xs border border-slate-200 text-slate-600 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 flex items-center space-x-1">
+                    <i data-lucide="flag" class="w-3.5 h-3.5"></i>
+                    <span id="flag-btn-label">Gắn cờ xem lại</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Question Text -->
+              <div class="space-y-2">
+                <p class="text-base sm:text-lg font-semibold text-slate-900 leading-snug" id="question-text-en">
+                  Loading question text...
+                </p>
+                <div id="question-translation-box" class="p-3 bg-slate-50 border-l-3 border-blue-600 rounded-r-md text-xs sm:text-sm text-slate-700 italic">
+                  Bản dịch câu hỏi tiếng Việt...
+                </div>
+              </div>
+
+              <!-- Options A, B, C, D -->
+              <div class="space-y-3 pt-2" id="options-container">
+                <!-- Rendered dynamically -->
+              </div>
+
+              <!-- Navigation Footer within Question -->
+              <div class="flex items-center justify-between pt-5 border-t border-slate-200">
+                <button onclick="clearCurrentAnswer()" class="text-xs text-slate-500 hover:text-red-700 underline flex items-center space-x-1">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                  <span>Bỏ chọn đáp án này</span>
+                </button>
+                <div class="flex items-center space-x-2">
+                  <button onclick="prevQuestion()" id="btn-prev" class="px-3 sm:px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs sm:text-sm font-medium flex items-center space-x-1.5 transition">
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                    <span>Câu trước</span>
+                  </button>
+                  <button onclick="nextQuestion()" id="btn-next" class="px-3 sm:px-4 py-2 rounded-lg bg-blue-800 text-white hover:bg-blue-900 text-xs sm:text-sm font-medium flex items-center space-x-1.5 transition">
+                    <span>Câu tiếp theo</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Question Navigator Palette (Right col) -->
+          <div class="lg:col-span-1 space-y-4">
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-4 sticky top-36">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Bảng câu hỏi</h4>
+                <span class="text-xs text-slate-500 font-mono" id="palette-stats">0/60</span>
+              </div>
+
+              <!-- Color Legend -->
+              <div class="grid grid-cols-3 gap-1 text-[11px] text-slate-600 pb-2 border-b border-slate-100">
+                <div class="flex items-center space-x-1">
+                  <span class="w-3 h-3 bg-blue-800 rounded"></span>
+                  <span>Đã làm</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                  <span class="w-3 h-3 bg-slate-100 border border-slate-300 rounded"></span>
+                  <span>Chưa làm</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                  <span class="w-3 h-3 bg-amber-400 rounded-full"></span>
+                  <span>Gắn cờ</span>
+                </div>
+              </div>
+
+              <!-- Question Grid Numbers -->
+              <div id="palette-grid" class="grid grid-cols-5 gap-1.5 max-h-[360px] overflow-y-auto pr-1">
+                <!-- Generated by JS -->
+              </div>
+
+              <button onclick="confirmSubmitExam()" class="w-full py-2.5 rounded-lg bg-green-700 hover:bg-green-800 text-white font-semibold text-xs sm:text-sm shadow-xs flex items-center justify-center space-x-2 transition">
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                <span>Nộp bài & Chấm điểm</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SUBVIEW D: EXAM RESULT & EXPLANATION (KẾT QUẢ VÀ GIẢI THÍCH CHI TIẾT) -->
+      <div id="exam-view-result" class="hidden space-y-6">
+        
+        <!-- Score Hero Card -->
+        <div class="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-xs">
+          <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="space-y-2 text-center md:text-left">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 uppercase tracking-wider" id="result-exam-tag">Kết quả kiểm tra</span>
+              <h2 class="text-xl sm:text-2xl font-bold text-slate-900" id="result-exam-title">Đề thi thử SLA</h2>
+              <p class="text-xs sm:text-sm text-slate-500">Hoàn thành lúc: <span id="result-time-stamp" class="font-medium text-slate-700">--:--</span> • Thời gian thực hiện: <span id="result-elapsed-time" class="font-medium text-slate-700">--</span></p>
+            </div>
+
+            <!-- Big Score Badge -->
+            <div class="flex items-center space-x-6 bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5">
+              <div class="text-center">
+                <span class="block text-xs text-slate-500 uppercase tracking-wider font-semibold">Điểm số</span>
+                <span class="text-3xl sm:text-4xl font-extrabold text-blue-800 font-mono-numbers" id="result-score-10">0.0</span>
+                <span class="text-xs text-slate-400 block font-mono">Thang điểm 10</span>
+              </div>
+              <div class="w-px h-12 bg-slate-200"></div>
+              <div class="text-center">
+                <span class="block text-xs text-slate-500 uppercase tracking-wider font-semibold">Tỷ lệ đúng</span>
+                <span class="text-3xl sm:text-4xl font-extrabold text-emerald-700 font-mono-numbers" id="result-percentage">0%</span>
+                <span class="text-xs text-slate-500 block font-mono" id="result-fraction">0/60 câu</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metric Cards -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-slate-100">
+            <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-200 text-center">
+              <span class="block text-xs text-emerald-800 font-medium">Số câu đúng</span>
+              <span class="text-xl font-bold text-emerald-700 font-mono-numbers" id="result-correct-count">0</span>
+            </div>
+            <div class="p-3 bg-red-50 rounded-lg border border-red-200 text-center">
+              <span class="block text-xs text-red-800 font-medium">Số câu sai</span>
+              <span class="text-xl font-bold text-red-700 font-mono-numbers" id="result-wrong-count">0</span>
+            </div>
+            <div class="p-3 bg-amber-50 rounded-lg border border-amber-200 text-center">
+              <span class="block text-xs text-amber-800 font-medium">Chưa làm</span>
+              <span class="text-xl font-bold text-amber-700 font-mono-numbers" id="result-skipped-count">0</span>
+            </div>
+            <div class="p-3 bg-blue-50 rounded-lg border border-blue-200 text-center">
+              <span class="block text-xs text-blue-800 font-medium">Đánh giá chung</span>
+              <span class="text-sm font-bold text-blue-800 truncate block mt-0.5" id="result-verdict">Khá Tốt</span>
+            </div>
+          </div>
+
+          <!-- Action bar -->
+          <div class="flex flex-wrap items-center justify-between gap-3 mt-6 pt-6 border-t border-slate-100">
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-semibold text-slate-700">Lọc xem câu hỏi:</span>
+              <button onclick="filterReviewQuestions('all')" id="rf-all" class="review-filter-btn px-2.5 py-1 rounded text-xs font-medium bg-slate-900 text-white">Tất cả</button>
+              <button onclick="filterReviewQuestions('wrong')" id="rf-wrong" class="review-filter-btn px-2.5 py-1 rounded text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200">Chỉ câu sai</button>
+              <button onclick="filterReviewQuestions('flagged')" id="rf-flagged" class="review-filter-btn px-2.5 py-1 rounded text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200">Câu gắn cờ</button>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="retakeCurrentExam()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs sm:text-sm font-medium flex items-center space-x-1.5">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Làm lại đề này</span>
+              </button>
+              <button onclick="exitToHub()" class="px-4 py-2 rounded-lg bg-blue-800 hover:bg-blue-900 text-white text-xs sm:text-sm font-semibold flex items-center space-x-1.5">
+                <span>Chọn đề thi khác</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Review Question Cards List -->
+        <div class="space-y-4" id="review-questions-list">
+          <!-- Rendered dynamically by JS -->
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: LỊCH SỬ LÀM BÀI & THEO DÕI NĂNG LỰC -->
+    <!-- ========================================== -->
+    <section id="section-history" class="hidden space-y-6">
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+            <i data-lucide="bar-chart-3" class="w-5 h-5 text-blue-700"></i>
+            <span>Lịch Sử Thi & Tiến Độ Năng Lực SLA</span>
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Dữ liệu được lưu trữ tự động trên phiên làm việc (State Persistence API).</p>
+        </div>
+        <button onclick="clearHistory()" class="text-xs text-red-600 hover:text-red-800 font-medium flex items-center space-x-1">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span>Xóa lịch sử</span>
+        </button>
+      </div>
+
+      <!-- History Summary Metrics -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-xs text-center">
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tổng số lượt làm bài</span>
+          <span class="text-3xl font-extrabold text-slate-900 block mt-1 font-mono-numbers" id="stat-total-attempts">0</span>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-xs text-center">
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Điểm trung bình</span>
+          <span class="text-3xl font-extrabold text-blue-800 block mt-1 font-mono-numbers" id="stat-avg-score">0.0</span>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-xs text-center">
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Điểm cao nhất đạt được</span>
+          <span class="text-3xl font-extrabold text-emerald-700 block mt-1 font-mono-numbers" id="stat-best-score">0.0</span>
+        </div>
+      </div>
+
+      <!-- History Table / Feed -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+        <div class="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+          <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Bảng kết quả các lượt thi gần đây</h3>
+          <span class="text-xs text-slate-500" id="history-count-text">0 bản ghi</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs sm:text-sm">
+            <thead class="bg-slate-100/75 text-slate-600 uppercase text-[11px] font-semibold">
+              <tr>
+                <th class="py-3 px-4">Thời gian</th>
+                <th class="py-3 px-4">Tên bài thi</th>
+                <th class="py-3 px-4 text-center">Số câu</th>
+                <th class="py-3 px-4 text-center">Thời gian làm</th>
+                <th class="py-3 px-4 text-center">Số câu đúng</th>
+                <th class="py-3 px-4 text-center">Điểm số / 10</th>
+                <th class="py-3 px-4 text-right">Đánh giá</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body" class="divide-y divide-slate-100">
+              <tr>
+                <td colspan="7" class="py-8 text-center text-slate-400">Chưa có bài thi nào được hoàn thành. Hãy vào "Phòng thi thử" để bắt đầu!</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Submit Confirmation Modal -->
+  <div id="submit-confirm-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+      <div class="flex items-center space-x-3 text-slate-900">
+        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center">
+          <i data-lucide="help-circle" class="w-5 h-5"></i>
+        </div>
+        <h3 class="text-lg font-bold">Xác nhận nộp bài thi?</h3>
+      </div>
+      <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+        Bạn có chắc chắn muốn nộp bài thi ngay bây giờ? Hệ thống sẽ dừng đếm giờ và tiến hành chấm điểm tự động.
+      </p>
+      
+      <div class="bg-slate-50 rounded-lg p-3 text-xs space-y-1.5 border border-slate-200">
+        <div class="flex justify-between">
+          <span class="text-slate-500">Tổng số câu hỏi:</span>
+          <span class="font-bold text-slate-800" id="modal-stat-total">60 câu</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Số câu đã trả lời:</span>
+          <span class="font-bold text-blue-800" id="modal-stat-answered">45 câu</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Số câu chưa chọn:</span>
+          <span class="font-bold text-amber-700" id="modal-stat-unanswered">15 câu</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Số câu đang gắn cờ:</span>
+          <span class="font-bold text-slate-700" id="modal-stat-flagged">2 câu</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end space-x-3 pt-2">
+        <button onclick="closeSubmitModal()" class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs sm:text-sm font-medium">
+          Tiếp tục làm bài
+        </button>
+        <button onclick="executeSubmitExam()" class="px-5 py-2 rounded-lg bg-green-700 hover:bg-green-800 text-white text-xs sm:text-sm font-semibold shadow-xs">
+          Xác nhận nộp bài
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4">
+      <p class="font-medium text-slate-700">SLA Study Platform • Thụ Đắc Ngôn Ngữ Thứ Hai</p>
+      <p class="mt-1">Dữ liệu ngân hàng câu hỏi & thuật ngữ xây dựng dựa trên các tài liệu nghiên cứu chuẩn mực về SLA.</p>
+    </div>
+  </footer>
+
+  <!-- State Persistence API Shim placeholder -->
+  <api-shim></api-shim>
+
+  <!-- ============================================================== -->
+  <!-- JAVASCRIPT APPLICATION CORE & DATASETS                        -->
+  <!-- ============================================================== -->
+  <script>
+    /* Global App State */
+    let currentTab = 'roadmap';
+    let currentExam = null;
+    let examTimerInterval = null;
+    let timeRemaining = 0;
+    let initialDurationSec = 0;
+    let isExamActive = false;
+    let currentQuestionIdx = 0;
+    let userAnswers = {}; // { qIndex: 'A' | 'B' | 'C' | 'D' }
+    let flaggedQuestions = new Set();
+    let isVietnameseVisible = true;
+    let currentReviewFilter = 'all';
+    let examHistory = [];
+
+    /* ============================================================== */
+    /* 1. COMPREHENSIVE ROADMAP DATASET (7 GIAI ĐOẠN)                  */
+    /* ============================================================== */
+    const ROADMAP_DATA = [
+      {
+        id: 'intro',
+        phase: 'Giai đoạn 0',
+        title: 'Giới Thiệu SLA & Các Khái Niệm Nền Tảng (Introduction)',
+        subtitle: 'Bản chất liên ngành, phân biệt SLL vs FLL, Interlanguage & Fossilization',
+        color: 'blue',
+        keyTakeaways: [
+          'SLA là nghiên cứu về cách các ngôn ngữ thứ hai được tiếp thu (sau khi đã có L1). Lĩnh vực này độc lập với phương pháp giảng dạy (Pedagogy) và tập trung tìm hiểu tiến trình học (learning process).',
+          'SLL (Second Language Learning) diễn ra trong môi trường nói ngôn ngữ đích (nhiều cơ hội tiếp xúc người bản xứ), còn FLL (Foreign Language Learning) diễn ra tại nước bản ngữ của người học (chủ yếu qua lớp học).',
+          'Interlanguage (Liên ngôn ngữ - IL): Hệ thống ngôn ngữ độc đáo và mang tính động (dynamic) do người học tự kiến tạo, kết hợp yếu tố L1, TL và các yếu tố riêng biệt không có ở cả hai.',
+          'Fossilization (Hóa thạch): Khi các cấu trúc lệch chuẩn trở nên cố định vĩnh viễn dù có tiếp tục tiếp xúc TL. Ngày nay các nhà nghiên cứu thường dùng thuật ngữ "Stabilization" (ổn định / chững lại) vì khó khẳng định việc học đã chấm dứt vĩnh viễn.'
+        ],
+        targetExamId: 'exam_intro_25',
+        examName: 'Đề Luyện Tập: Introduction (25 Câu - 25 Phút)'
+      },
+      {
+        id: 'c1',
+        phase: 'Chương 1',
+        title: 'Nguyên Tắc Chỉ Dẫn & Bản Chất Tiếp Thu Ngôn Ngữ (Guiding Principles)',
+        subtitle: 'Acquisition vs Skill Development, Vai trò của Input/Output, 3 Chế độ Giao tiếp, So sánh L1 & L2+',
+        color: 'indigo',
+        keyTakeaways: [
+          'Tiếp thu ngôn ngữ (Acquisition) là quá trình (chủ yếu là) ngầm ẩn (implicit) xây dựng hệ thống ngôn ngữ thông qua tạo kết nối hình thức - ý nghĩa từ nguồn đầu vào (Input).',
+          'Quy tắc vàng: "Input builds the system; Output accesses the system". Không có input thì không thể có output. Học và áp dụng quy tắc ngữ pháp có ý thức không tạo nên sự tiếp thu.',
+          'Định nghĩa giao tiếp (VanPatten): Diễn giải và/hoặc biểu đạt ý nghĩa có mục đích trong ngữ cảnh. Phải trả lời 2 câu hỏi: Thông tin gì được truyền tải? Người nghe sẽ làm gì với thông tin đó?',
+          '3 Chế độ giao tiếp: Interpretive (Diễn giải - 1 chiều đọc/nghe hiểu), Presentational (Trình bày - 1 chiều nói/viết có chuẩn bị), Interpersonal (Tương tác - 2 chiều có khoảng trống thông tin).',
+          'So sánh L1 vs L2+: Giống nhau về sự cần thiết của input và tiến trình phát triển hình chữ U (U-shaped development, over-regularization như "foots"). Khác nhau ở chỗ người học L2+ đã có hệ thống L1 sẵn nên xuất hiện lỗi chuyển di (transfer errors).'
+        ],
+        targetExamId: 'exam_c1_60',
+        examName: 'Đề Chuẩn: Chapter 1 (60 Câu - 60 Phút)'
+      },
+      {
+        id: 'c2',
+        phase: 'Chương 2 (Mục tiêu)',
+        title: 'Mục Tiêu Năng Lực & Đánh Giá Giao Tiếp (Goals and Assessment)',
+        subtitle: 'Proficiency vs Performance, Khung ACTFL 4 cấp độ, Thiết kế ngược & IPA, 3Ps Văn hóa',
+        color: 'sky',
+        keyTakeaways: [
+          'Proficiency (Năng lực giao tiếp thực tế, tự phát trong đời thực không chuẩn bị) khác với Performance (Khả năng thực hiện nhiệm vụ trong lớp học sau khi đã luyện tập).',
+          'ACTFL 4 cấp độ: Novice (từ, đoạn câu ghi nhớ, phản ứng), Intermediate (câu đơn, thì hiện tại, chủ đề cá nhân), Advanced (đoạn văn liên kết, kể chuyện ở quá khứ/hiện tại/tương lai), Superior (lập luận, giả thuyết, khái niệm trừu tượng).',
+          'Đánh giá hiệu suất tích hợp (IPA): 3 nhiệm vụ liên hoàn (Interpretive -> Interpersonal -> Presentational) gắn liền với chủ đề thực tế và có phản hồi lồng ghép.',
+          'Mục tiêu văn hóa 3Ps: Products (Sản phẩm), Practices (Thực hành hành vi) và Perspectives (Quan điểm, giá trị văn hóa ngầm ẩn).'
+        ],
+        targetExamId: 'exam_c2_goals_60',
+        examName: 'Đề Chuẩn: Goals & Assessment (60 Câu - 60 Phút)'
+      },
+      {
+        id: 'c2s2',
+        phase: 'Chương 2 (Dữ liệu)',
+        title: 'Dữ Liệu Trong SLA & Phương Pháp Nghiên Cứu (Research Methods)',
+        subtitle: 'Longitudinal vs Cross-Sectional, Ngân hàng ngữ liệu (Corpora), Elicitation, Replication',
+        color: 'emerald',
+        keyTakeaways: [
+          'Nghiên cứu dài hạn (Longitudinal): Theo dõi số lượng ít đối tượng qua thời gian dài, thu thập lời nói tự nhiên, phân tích định tính mô tả, theo dõi tiến trình phát triển nhưng tính khái quát hóa thấp.',
+          'Nghiên cứu cắt ngang (Cross-Sectional): Khảo sát nhiều người học ở các trình độ khác nhau tại một thời điểm duy nhất, sử dụng nhiệm vụ kiểm soát, phân tích thống kê định lượng, tính khái quát hóa cao hơn.',
+          'Ngân hàng ngữ liệu (Learner Corpora): Cơ sở dữ liệu số hóa khổng lồ chứa hàng triệu từ văn bản viết hoặc nói của người học L2, cho phép phân tích tự động bằng phần mềm để tìm ra các mẫu ngôn ngữ hiếm.',
+          'Replication (Nghiên cứu lặp lại) nhằm xác nhận độ tin cậy và kiểm tra tính khái quát của lý thuyết. Meta-Analyses (Phân tích tổng hợp) gộp kết quả nhiều nghiên cứu để tính toán độ mạnh của phát hiện (effect size).'
+        ],
+        targetExamId: 'exam_c2_data_40',
+        examName: 'Đề Chuẩn: Research & Data (40 Câu - 40 Phút)'
+      },
+      {
+        id: 'c3',
+        phase: 'Chương 3',
+        title: 'Đầu Vào, Giả Thuyết i+1 & Giàn Giáo Hỗ Trợ (Input & Scaffolding)',
+        subtitle: 'Comprehensible & Compelling Input, Giả thuyết Krashen, Focus on Form (FonF), Structured Input',
+        color: 'teal',
+        keyTakeaways: [
+          'Đầu vào (Input) là ngôn ngữ người học nghe hoặc đọc với mục đích hiểu nghĩa. Để kích hoạt tiếp thu, input phải vừa Comprehensible (Dễ hiểu) vừa Compelling (Hấp dẫn/cuốn hút).',
+          'Giả thuyết i+1 của Krashen: Người học tiếp thu khi hiểu thông điệp hơi vượt mức hiện tại (i+1). Input quá dễ (i-1) làm việc học chậm lại; input quá khó khiến người học phụ thuộc vào dịch (translation).',
+          'Scaffolding: Giáo viên điều chỉnh lời nói, dùng cử chỉ, hình ảnh và chọn tài liệu đọc phân cấp (Graded Readers) hoặc tài liệu xác thực có giàn giáo hỗ trợ.',
+          'Focus on Form (FonF): Gợi ý tinh tế về ngữ pháp/từ vựng ngay trong lúc thực hiện các hoạt động giao tiếp có ý nghĩa. Structured Input xử lý 1 dạng thức mục tiêu tại một thời điểm để làm nổi bật ý nghĩa.'
+        ],
+        targetExamId: 'exam_c3_40',
+        examName: 'Đề Chuẩn: Chapter 3 Input (40 Câu - 40 Phút)'
+      },
+      {
+        id: 'c4',
+        phase: 'Chương 4',
+        title: 'Năng Lực Diễn Giải & Xử Lý Văn Bản (Interpretive Proficiency)',
+        subtitle: 'Reading & Listening, Top-Down vs Bottom-Up, Macro vs Micro, Cấu trúc bài học 3 giai đoạn',
+        color: 'cyan',
+        keyTakeaways: [
+          'Năng lực diễn giải (Interpretive) bao gồm đọc và nghe hiểu sâu, vượt ra khỏi mức độ hiểu theo nghĩa đen đơn thuần.',
+          'Xử lý từ dưới lên (Bottom-up / Local strategy): phân tích từ, chữ cái, cấu trúc ngữ pháp. Xử lý từ trên xuống (Top-down / Global strategy): dùng kiến thức nền, bối cảnh, tiêu đề để dự đoán và suy luận. Người đọc giỏi kết hợp cả hai.',
+          'Cấu trúc bài học diễn giải gồm 3 giai đoạn: Pre-Reading/Listening (chuẩn bị, kích hoạt kiến thức nền, K-L-W), While (chủ động nắm ý chính, điền bảng, vẽ tranh), Post (phản hồi sáng tạo, kết nối cá nhân).',
+          'Văn bản nói (oral text) mang tính phù du, trôi chảy, chịu ảnh hưởng của phát âm/tiếng ồn; văn bản viết tĩnh hơn và có thể đọc lại nhiều lần.'
+        ],
+        targetExamId: 'exam_c4_30',
+        examName: 'Đề Chuyên Đề: Interpretive Proficiency (30 Câu - 30 Phút)'
+      },
+      {
+        id: 'c5c6',
+        phase: 'Chương 5 & 6',
+        title: 'Đầu Ra, Tương Tác & Phương Pháp TBLT (Output, Interaction & Tasks)',
+        subtitle: 'Giả thuyết Swain, Tranh luận Truscott vs Ferris, Long Interaction Hypothesis, Recasts vs Elicitation',
+        color: 'violet',
+        keyTakeaways: [
+          'Giả thuyết Đầu ra (Swain): Output buộc người học chú ý đến khoảng trống (notice the gap), thử nghiệm giả thuyết (hypothesis testing) và kích hoạt suy ngẫm siêu ngôn ngữ.',
+          'Tranh luận sửa lỗi: Truscott cho rằng sửa ngữ pháp chỉ tạo "giả học" (pseudo-learning) và làm nản lòng người học; Ferris chứng minh sửa lỗi có chọn lọc, ưu tiên và rõ ràng đem lại hiệu quả thực sự.',
+          'Giả thuyết Tương tác (Long): Tương tác kết nối input, năng lực bên trong, output và sự chú ý có chọn lọc qua quá trình thương lượng ý nghĩa (negotiation of meaning).',
+          'Phản hồi sửa lỗi: Recast (sửa kín đáo, không ngắt quãng dòng giao tiếp, mang tính cung cấp đầu vào - input-providing); Elicitation (gợi ý học sinh tự sửa lỗi, output-prompting).',
+          'Dạy học dựa trên nhiệm vụ (TBLT): Nhiệm vụ có tính xác thực về tương tác (interactionally authentic), có khoảng trống thông tin (information gap) và kết quả phi ngôn ngữ cụ thể.'
+        ],
+        targetExamId: 'exam_c6_45',
+        examName: 'Đề Chuẩn: Chapter 6 Interaction (45 Câu - 45 Phút)'
+      }
+    ];
+
+    /* ============================================================== */
+    /* 2. BILINGUAL GLOSSARY DATASET (APPENDIX 1 & CORE TERMINOLOGY)  */
+    /* ============================================================== */
+    const GLOSSARY_DATA = [
+      {
+        term: 'Affective Filter Hypothesis',
+        acronym: 'AFH',
+        category: 'hypothesis',
+        viName: 'Giả thuyết bộ lọc cảm xúc',
+        definition: 'Giả thuyết của Krashen cho rằng các yếu tố tâm lý (lo lắng, sự tự tin, động lực) hoạt động như một rào cản ngăn cản input đi vào cơ chế tiếp thu ngôn ngữ.'
+      },
+      {
+        term: 'Comprehensible Input',
+        acronym: 'CI / i+1',
+        category: 'hypothesis',
+        viName: 'Đầu vào dễ hiểu',
+        definition: 'Nguồn ngữ liệu mà người học nghe hoặc đọc hơi vượt mức trình độ hiện tại một chút (i+1), giúp người học kết nối hình thức với ý nghĩa để xây dựng hệ thống ngôn ngữ.'
+      },
+      {
+        term: 'Interlanguage',
+        acronym: 'IL',
+        category: 'system',
+        viName: 'Liên ngôn ngữ',
+        definition: 'Hệ thống ngôn ngữ trung gian, có quy tắc và mang tính động do người học L2 tự kiến tạo, kết hợp các yếu tố từ L1, TL và các yếu tố riêng biệt do người học tạo ra.'
+      },
+      {
+        term: 'Fossilization',
+        acronym: '–',
+        category: 'system',
+        viName: 'Hiện tượng hóa thạch',
+        definition: 'Trạng thái khi một dạng thức hoặc cấu trúc lệch chuẩn so với ngôn ngữ đích trở nên cố định vĩnh viễn trong liên ngôn ngữ của người học, không thay đổi dù tiếp tục tiếp xúc TL.'
+      },
+      {
+        term: 'Stabilization',
+        acronym: '–',
+        category: 'system',
+        viName: 'Hiện tượng ổn định / chững lại',
+        definition: 'Thuật ngữ được nhiều nhà nghiên cứu ưu tiên thay thế cho hóa thạch, biểu thị giai đoạn chững lại (plateau) của sự phát triển ngôn ngữ vì khó xác định việc học đã chấm dứt hoàn toàn hay chưa.'
+      },
+      {
+        term: 'Output Hypothesis',
+        acronym: 'OH',
+        category: 'hypothesis',
+        viName: 'Giả thuyết đầu ra',
+        definition: 'Đề xuất bởi Merrill Swain, cho rằng việc sản sinh ngôn ngữ (nói/viết) đẩy người học nhận ra khoảng trống (notice the gap), thử nghiệm giả thuyết và kích hoạt suy ngẫm siêu ngôn ngữ.'
+      },
+      {
+        term: 'Interaction Hypothesis',
+        acronym: '–',
+        category: 'hypothesis',
+        viName: 'Giả thuyết tương tác',
+        definition: 'Đề xuất bởi Michael Long (1996), khẳng định tương tác giao tiếp kết nối input, năng lực bên trong, sự chú ý có chọn lọc và output thông qua thương lượng ý nghĩa (negotiation of meaning).'
+      },
+      {
+        term: 'Recast',
+        acronym: '–',
+        category: 'pedagogy',
+        viName: 'Cải biến sửa lỗi (Nhắc lại cho đúng)',
+        definition: 'Hình thức phản hồi sửa lỗi ngầm (implicit, input-providing) khi người đối thoại diễn đạt lại một phần hoặc toàn bộ câu nói của người học theo dạng thức chuẩn xác mà không làm ngắt mạch hội thoại.'
+      },
+      {
+        term: 'Elicitation',
+        acronym: '–',
+        category: 'pedagogy',
+        viName: 'Gợi mở sửa lỗi',
+        definition: 'Kỹ thuật phản hồi thúc đẩy đầu ra (output-prompting), người hướng dẫn sử dụng ngữ điệu lên giọng, tạm dừng lửng lơ hoặc đặt câu hỏi để yêu cầu người học tự sửa lỗi của chính mình.'
+      },
+      {
+        term: 'Form-Focused Episode',
+        acronym: 'FFE',
+        category: 'pedagogy',
+        viName: 'Đoạn chú trọng hình thức',
+        definition: 'Khoảnh khắc trong hội thoại khi những người giao tiếp tạm thời chuyển sự chú ý từ ý nghĩa sang hình thức ngôn ngữ để giải quyết một khúc mắc từ vựng hoặc ngữ pháp (có thể chủ động - preemptive hoặc phản ứng - reactive).'
+      },
+      {
+        term: 'Integrated Performance Assessment',
+        acronym: 'IPA',
+        category: 'pedagogy',
+        viName: 'Đánh giá hiệu suất tích hợp',
+        definition: 'Mô hình đánh giá chuẩn hóa gồm 3 nhiệm vụ liên hoàn xoay quanh một chủ đề thực tế: Interpretive (Diễn giải) -> Interpersonal (Tương tác) -> Presentational (Trình bày), có phản hồi lồng ghép.'
+      },
+      {
+        term: 'Task-Based Language Teaching',
+        acronym: 'TBLT',
+        category: 'pedagogy',
+        viName: 'Dạy học dựa trên nhiệm vụ',
+        definition: 'Phương pháp tổ chức việc dạy học xoay quanh các nhiệm vụ có tính xác thực về tương tác (interactionally authentic), chứa đựng khoảng trống thông tin và có kết quả cụ thể ngoài ngôn ngữ.'
+      },
+      {
+        term: 'Focus on Form',
+        acronym: 'FonF',
+        category: 'pedagogy',
+        viName: 'Chú trọng vào hình thức',
+        definition: 'Cách tiếp cận sư phạm hướng sự chú ý của người học vào các đặc điểm ngữ pháp hoặc từ vựng trong bối cảnh giao tiếp có ý nghĩa, khác với Focus on Forms (dạy ngữ pháp rời rạc truyền thống).'
+      },
+      {
+        term: 'Structured Input',
+        acronym: 'SI',
+        category: 'pedagogy',
+        viName: 'Đầu vào có cấu trúc',
+        definition: 'Bài tập được thiết kế để người học xử lý duy nhất một dạng thức ngữ pháp mục tiêu tại một thời điểm thông qua các câu ngắn nhằm làm nổi bật ý nghĩa, tránh phụ thuộc học vẹt quy tắc.'
+      },
+      {
+        term: 'Learner Corpus',
+        acronym: 'Corpora',
+        category: 'system',
+        viName: 'Ngân hàng ngữ liệu người học',
+        definition: 'Cơ sở dữ liệu điện tử quy mô lớn lưu trữ ngôn ngữ thực tế (viết hoặc nói) do người học L2 sản sinh, cho phép tra cứu tự động bằng phần mềm máy tính để phục vụ nghiên cứu SLA.'
+      },
+      {
+        term: 'Language Transfer',
+        acronym: 'LT',
+        category: 'linguistics',
+        viName: 'Chuyển di ngôn ngữ',
+        definition: 'Ảnh hưởng từ ngôn ngữ mẹ đẻ (L1) lên việc tiếp thu ngôn ngữ đích (L2). Có thể là chuyển di tích cực (hỗ trợ) hoặc chuyển di tiêu cực (gây lỗi chuyển di - transfer errors).'
+      },
+      {
+        term: 'U-shaped Development',
+        acronym: '–',
+        category: 'linguistics',
+        viName: 'Phát triển hình chữ U',
+        definition: 'Hiện tượng phát triển ngôn ngữ khi người học ban đầu có vẻ thành thạo một dạng thức, sau đó mắc lỗi (thường do khái quát hóa quá mức - over-regularization), rồi cuối cùng làm chủ lại dạng thức đó.'
+      },
+      {
+        term: 'Universal Grammar',
+        acronym: 'UG',
+        category: 'linguistics',
+        viName: 'Ngữ pháp phổ quát',
+        definition: 'Lý thuyết của Noam Chomsky cho rằng con người sinh ra đã có sẵn hệ thống nguyên lý ngữ pháp bẩm sinh chi phối việc tiếp thu ngôn ngữ.'
+      },
+      {
+        term: 'Metalinguistic Awareness',
+        acronym: '–',
+        category: 'linguistics',
+        viName: 'Nhận thức siêu ngôn ngữ',
+        definition: 'Khả năng xem xét, phân tích và phản tư một cách có ý thức về bản thân ngôn ngữ và các quy tắc vận hành của nó.'
+      },
+      {
+        term: 'Zone of Proximal Development',
+        acronym: 'ZPD',
+        category: 'pedagogy',
+        viName: 'Vùng phát triển gần nhất',
+        definition: 'Khái niệm của Vygotsky chỉ khoảng cách giữa những gì người học có thể tự làm và những gì họ có thể đạt được khi có sự hướng dẫn, giàn giáo hỗ trợ (scaffolding) từ người có kinh nghiệm hơn.'
+      }
+    ];
+
+    /* ============================================================== */
+    /* 3. EXAMS CATALOG & RICH QUESTION BANK                          */
+    /* ============================================================== */
+    const EXAMS_CATALOG = [
+      {
+        id: 'exam_c1_60',
+        title: 'Đề Thi Chuẩn 60 Câu: Nguyên Tắc Chỉ Dẫn & Bản Chất SLA',
+        chapter: 'Chương 1 (Chapter 1)',
+        durationMinutes: 60,
+        questionCount: 60,
+        difficulty: 'Tiêu chuẩn',
+        badgeColor: 'bg-indigo-100 text-indigo-800',
+        desc: 'Bao quát toàn bộ 60 câu trắc nghiệm Chương 1: Định nghĩa tiếp thu ngầm, vai trò input/output, 3 chế độ giao tiếp, so sánh L1 vs L2+ và thách thức của giáo viên.',
+        questions: generateChapter1Questions()
+      },
+      {
+        id: 'exam_c2_goals_60',
+        title: 'Đề Thi Chuẩn 60 Câu: Mục Tiêu Năng Lực & Đánh Giá IPA',
+        chapter: 'Chương 2 (Goals & Assessment)',
+        durationMinutes: 60,
+        questionCount: 60,
+        difficulty: 'Tiêu chuẩn',
+        badgeColor: 'bg-blue-100 text-blue-800',
+        desc: '60 câu trắc nghiệm chuyên sâu về 4 cấp độ ACTFL (Novice, Intermediate, Advanced, Superior), thiết kế ngược, đánh giá IPA, Rubric phân tích và 3Ps văn hóa.',
+        questions: generateChapter2GoalsQuestions()
+      },
+      {
+        id: 'exam_c5_50',
+        title: 'Đề Thi Chuẩn 50 Câu: Năng Lực Đầu Ra & Giả Thuyết Output',
+        chapter: 'Chương 5 (Output)',
+        durationMinutes: 50,
+        questionCount: 50,
+        difficulty: 'Nâng cao',
+        badgeColor: 'bg-violet-100 text-violet-800',
+        desc: '50 câu hỏi về Giả thuyết Đầu ra của Swain, mô hình Quy trình - Sản phẩm (Process vs Product), tranh luận sửa lỗi Truscott vs Ferris và tính tự động (automaticity).',
+        questions: generateChapter5Questions()
+      },
+      {
+        id: 'exam_c6_45',
+        title: 'Đề Thi Chuẩn 45 Câu: Tương Tác & Dạy Học Theo Nhiệm Vụ TBLT',
+        chapter: 'Chương 6 (Interaction)',
+        durationMinutes: 45,
+        questionCount: 45,
+        difficulty: 'Tiêu chuẩn',
+        badgeColor: 'bg-purple-100 text-purple-800',
+        desc: '45 câu hỏi xoay quanh Giả thuyết Tương tác Michael Long, các loại phản hồi (Recast, Elicitation, Clarification), Form-Focused Episodes và tiêu chí nhiệm vụ TBLT.',
+        questions: generateChapter6Questions()
+      },
+      {
+        id: 'exam_c3_40',
+        title: 'Đề Thi Chuẩn 40 Câu: Đầu Vào & Giả Thuyết Krashen i+1',
+        chapter: 'Chương 3 (Input)',
+        durationMinutes: 40,
+        questionCount: 40,
+        difficulty: 'Tiêu chuẩn',
+        badgeColor: 'bg-teal-100 text-teal-800',
+        desc: '40 câu hỏi trắc nghiệm về Comprehensible & Compelling Input, công thức i+1 của Krashen, Graded Readers, Scaffolding giáo viên và Structured Input.',
+        questions: generateChapter3Questions()
+      },
+      {
+        id: 'exam_c2_data_40',
+        title: 'Đề Thi Chuẩn 40 Câu: Phương Pháp Nghiên Cứu & Dữ Liệu SLA',
+        chapter: 'Chương 2 S2 (Research & Data)',
+        durationMinutes: 40,
+        questionCount: 40,
+        difficulty: 'Nâng cao',
+        badgeColor: 'bg-emerald-100 text-emerald-800',
+        desc: '40 câu hỏi so sánh Nghiên cứu Dài hạn (Longitudinal) vs Cắt ngang (Cross-sectional), Ngân hàng ngữ liệu (Learner Corpora), Khơi gợi dữ liệu, Replication & Meta-analyses.',
+        questions: generateChapter2DataQuestions()
+      },
+      {
+        id: 'exam_intro_25',
+        title: 'Đề Luyện Tập 25 Câu: Tổng Quan SLA & Liên Ngôn Ngữ',
+        chapter: 'Chương Giới thiệu (Introduction)',
+        durationMinutes: 25,
+        questionCount: 25,
+        difficulty: 'Cơ bản',
+        badgeColor: 'bg-amber-100 text-amber-800',
+        desc: '25 câu hỏi nền tảng về định nghĩa SLA, sự khác biệt với Pedagogy, các phân ngành ngôn ngữ học (Semantics, Pragmatics, Syntax, Morphology) và Fossilization.',
+        questions: generateIntroQuestions()
+      },
+      {
+        id: 'exam_c4_30',
+        title: 'Đề Luyện Tập 30 Câu: Năng Lực Diễn Giải & Xử Lý Văn Bản',
+        chapter: 'Chương 4 (Interpretive)',
+        durationMinutes: 30,
+        questionCount: 30,
+        difficulty: 'Tiêu chuẩn',
+        badgeColor: 'bg-cyan-100 text-cyan-800',
+        desc: '30 câu hỏi chuyên sâu về năng lực đọc/nghe hiểu, chiến lược Bottom-up vs Top-down, văn bản nói vs văn bản viết, và thiết kế 3 giai đoạn Pre-While-Post.',
+        questions: generateChapter4Questions()
+      }
+    ];
+
+    /* ============================================================== */
+    /* QUESTION GENERATORS (TRÍCH XUẤT 100% CHÍNH XÁC TỪ TÀI LIỆU)    */
+    /* ============================================================== */
+
+    function generateChapter1Questions() {
+      // 60 questions from Chapter 1 MCQ
+      return [
+        {
+          q_en: "Language acquisition is defined as the (mostly) implicit process of building a linguistic system by creating form-meaning connections from the...",
+          q_vi: "Tiếp thu ngôn ngữ được định nghĩa là quá trình (chủ yếu là) ngầm ẩn xây dựng một hệ thống ngôn ngữ bằng cách tạo ra các kết nối hình thức - ý nghĩa từ...",
+          options: [
+            { key: 'A', text_en: "learner's output.", text_vi: "sản phẩm đầu ra của người học." },
+            { key: 'B', text_en: "explicit rules.", text_vi: "các quy tắc ngôn ngữ tường minh." },
+            { key: 'C', text_en: "input.", text_vi: "nguồn đầu vào (input)." },
+            { key: 'D', text_en: "conscious correction.", text_vi: "sự sửa lỗi có ý thức." }
+          ],
+          answer: 'C',
+          explanation: "Theo Chương 1, tiếp thu ngôn ngữ là quá trình ngầm ẩn tạo kết nối giữa hình thức và ý nghĩa bắt nguồn trực tiếp từ ĐẦU VÀO (input). Output chỉ giúp truy cập hệ thống chứ không xây dựng hệ thống."
+        },
+        {
+          q_en: "Acquisition fundamentally occurs when the learner is focused on...",
+          q_vi: "Sự tiếp thu về cơ bản xảy ra khi người học tập trung vào...",
+          options: [
+            { key: 'A', text_en: "understanding messages.", text_vi: "việc hiểu các thông điệp." },
+            { key: 'B', text_en: "memorizing vocabulary lists.", text_vi: "ghi nhớ danh sách từ vựng." },
+            { key: 'C', text_en: "applying learned grammar rules.", text_vi: "áp dụng các quy tắc ngữ pháp đã học." },
+            { key: 'D', text_en: "producing error-free sentences.", text_vi: "tạo ra các câu không có lỗi." }
+          ],
+          answer: 'A',
+          explanation: "Về bản chất, sự tiếp thu ngôn ngữ diễn ra trong khi người học tập trung vào việc thấu hiểu thông điệp (understanding messages) chứ không phải phân tích quy tắc."
+        },
+        {
+          q_en: "The nature of the acquisition process is that learners...",
+          q_vi: "Bản chất của quá trình tiếp thu là người học...",
+          options: [
+            { key: 'A', text_en: "can consciously control it.", text_vi: "có thể kiểm soát nó một cách có ý thức." },
+            { key: 'B', text_en: "cannot consciously control it.", text_vi: "không thể kiểm soát nó một cách có ý thức." },
+            { key: 'C', text_en: "can speed it up with explicit instruction.", text_vi: "có thể đẩy nhanh nhờ dạy quy tắc tường minh." },
+            { key: 'D', text_en: "have total control over what is acquired.", text_vi: "kiểm soát hoàn toàn những gì được tiếp thu." }
+          ],
+          answer: 'B',
+          explanation: "Cả giáo viên lẫn người học đều không thể kiểm soát có ý thức đối với những gì được tiếp thu vào hệ thống ngôn ngữ ngầm (implicit system)."
+        },
+        {
+          q_en: "The role of Input in the acquisition process is to...",
+          q_vi: "Vai trò của Input trong quá trình tiếp thu là...",
+          options: [
+            { key: 'A', text_en: "help learners get better at accessing the system.", text_vi: "giúp người học truy cập hệ thống tốt hơn." },
+            { key: 'B', text_en: "build the linguistic system.", text_vi: "xây dựng hệ thống ngôn ngữ." },
+            { key: 'C', text_en: "provide opportunities for skill development.", text_vi: "cung cấp cơ hội phát triển kỹ năng." },
+            { key: 'D', text_en: "act as a substitute for output.", text_vi: "thay thế hoàn toàn cho đầu ra." }
+          ],
+          answer: 'B',
+          explanation: "Nguyên lý cốt lõi: 'Input builds the linguistic system' (Đầu vào kiến tạo hệ thống ngôn ngữ)."
+        },
+        {
+          q_en: "Which parts of the input are more likely to be processed?",
+          q_vi: "Những phần nào của nguồn đầu vào có nhiều khả năng được xử lý nhất?",
+          options: [
+            { key: 'A', text_en: "The complex, low-frequency structures.", text_vi: "Các cấu trúc phức tạp, tần suất thấp." },
+            { key: 'B', text_en: "Parts that help the learner understand the message.", text_vi: "Các phần giúp người học hiểu được thông điệp." },
+            { key: 'C', text_en: "The parts that focus on explicit grammatical forms.", text_vi: "Các phần tập trung vào hình thức ngữ pháp tường minh." },
+            { key: 'D', text_en: "The parts that require conscious mental effort.", text_vi: "Các phần đòi hỏi nỗ lực trí tuệ có ý thức." }
+          ],
+          answer: 'B',
+          explanation: "Bộ não người học ưu tiên xử lý những tín hiệu ngôn ngữ trong đầu vào trực tiếp hỗ trợ việc giải mã và hiểu ý nghĩa của thông điệp."
+        },
+        {
+          q_en: "It is crucial not to confuse acquisition with...",
+          q_vi: "Điều đặc biệt quan trọng là không được nhầm lẫn sự tiếp thu (acquisition) với...",
+          options: [
+            { key: 'A', text_en: "implicit processes.", text_vi: "các quá trình ngầm ẩn." },
+            { key: 'B', text_en: "creating form-meaning connections.", text_vi: "tạo kết nối hình thức - ý nghĩa." },
+            { key: 'C', text_en: "skill development.", text_vi: "sự phát triển kỹ năng (skill development)." },
+            { key: 'D', text_en: "comprehension of input.", text_vi: "việc hiểu đầu vào." }
+          ],
+          answer: 'C',
+          explanation: "Tài liệu nhấn mạnh không nhầm lẫn giữa 'acquisition' (xây dựng hệ thống ngôn ngữ nội tại) với 'skill development' (tập nói, tập phản xạ bề mặt)."
+        },
+        {
+          q_en: "The role of Output is to...",
+          q_vi: "Vai trò của Output (Đầu ra) là...",
+          options: [
+            { key: 'A', text_en: "build the linguistic system.", text_vi: "xây dựng hệ thống ngôn ngữ." },
+            { key: 'B', text_en: "act as the primary source of form-meaning connections.", text_vi: "là nguồn chính tạo kết nối hình thức - ý nghĩa." },
+            { key: 'C', text_en: "help learners get better at accessing the system.", text_vi: "giúp người học truy cập hệ thống tốt hơn." },
+            { key: 'D', text_en: "alter the core acquisition process.", text_vi: "thay đổi tiến trình tiếp thu cốt lõi." }
+          ],
+          answer: 'C',
+          explanation: "Output không xây dựng hệ thống ngôn ngữ; chức năng chính của nó là rèn luyện khả năng truy cập (accessing) vào hệ thống ngầm đã được xây dựng từ input."
+        },
+        {
+          q_en: "Which statement is true regarding input and output?",
+          q_vi: "Nhận định nào sau đây là đúng về mối quan hệ giữa input và output?",
+          options: [
+            { key: 'A', text_en: "Output builds the system, but input doesn't.", text_vi: "Output xây dựng hệ thống, còn input thì không." },
+            { key: 'B', text_en: "No input means no output.", text_vi: "Không có input đồng nghĩa với không có output." },
+            { key: 'C', text_en: "Input is only necessary for skill development.", text_vi: "Input chỉ cần thiết cho phát triển kỹ năng." },
+            { key: 'D', text_en: "Acquisition is controlled by output.", text_vi: "Sự tiếp thu bị chi phối bởi output." }
+          ],
+          answer: 'B',
+          explanation: "Không có input thì não bộ không có chất liệu để hình thành hệ thống; do đó 'No input means no output'."
+        },
+        {
+          q_en: "We do not acquire a language by...",
+          q_vi: "Chúng ta không tiếp thu một ngôn ngữ bằng cách...",
+          options: [
+            { key: 'A', text_en: "creating form-meaning connections.", text_vi: "tạo các kết nối hình thức - ý nghĩa." },
+            { key: 'B', text_en: "learning its rules and applying them.", text_vi: "học các quy tắc của nó rồi đem ra áp dụng." },
+            { key: 'C', text_en: "engaging in a mostly implicit process.", text_vi: "tham gia vào một quá trình chủ yếu ngầm ẩn." },
+            { key: 'D', text_en: "focusing on understanding messages.", text_vi: "tập trung vào việc hiểu thông điệp." }
+          ],
+          answer: 'B',
+          explanation: "Khoa học SLA khẳng định chúng ta không thụ đắc ngôn ngữ bằng việc học vẹt quy tắc rồi vận dụng có ý thức (learning rules and applying them)."
+        },
+        {
+          q_en: "Acquisition is a mostly implicit process that occurs outside of the...",
+          q_vi: "Tiếp thu là một quá trình chủ yếu ngầm ẩn diễn ra bên ngoài...",
+          options: [
+            { key: 'A', text_en: "input zone.", text_vi: "vùng đầu vào." },
+            { key: 'B', text_en: "skill development zone.", text_vi: "vùng phát triển kỹ năng." },
+            { key: 'C', text_en: "comprehension zone.", text_vi: "vùng thấu hiểu." },
+            { key: 'D', text_en: "conscious zone.", text_vi: "vùng ý thức (conscious zone)." }
+          ],
+          answer: 'D',
+          explanation: "Quá trình tiếp thu diễn ra chủ yếu trong vùng tiềm thức/ngầm ẩn, nằm ngoài tầm kiểm soát của vùng ý thức (conscious zone)."
+        },
+        {
+          q_en: "The core mechanism of acquisition (roles of input, output, etc.) applies to...",
+          q_vi: "Cơ chế cốt lõi của sự tiếp thu (vai trò của input, output,...) áp dụng cho...",
+          options: [
+            { key: 'A', text_en: "only L2+ acquisition in the classroom.", text_vi: "chỉ việc học L2+ trong lớp học." },
+            { key: 'B', text_en: "only L1 acquisition.", text_vi: "chỉ sự tiếp thu tiếng mẹ đẻ L1." },
+            { key: 'C', text_en: "L2+ acquisition for children only.", text_vi: "chỉ L2+ đối với trẻ em." },
+            { key: 'D', text_en: "all languages.", text_vi: "tất cả các ngôn ngữ." }
+          ],
+          answer: 'D',
+          explanation: "Nguyên lý xây dựng hệ thống ngôn ngữ qua input áp dụng phổ quát cho tất cả các ngôn ngữ (all languages)."
+        },
+        {
+          q_en: "Neither teachers nor students have total control over...",
+          q_vi: "Cả giáo viên và học sinh đều không có quyền kiểm soát toàn diện đối với...",
+          options: [
+            { key: 'A', text_en: "the type of output produced.", text_vi: "loại đầu ra được tạo ra." },
+            { key: 'B', text_en: "the explicit grammar rules.", text_vi: "các quy tắc ngữ pháp tường minh." },
+            { key: 'C', text_en: "what is acquired.", text_vi: "những gì được tiếp thu vào bộ não." },
+            { key: 'D', text_en: "the amount of input received.", text_vi: "lượng đầu vào nhận được." }
+          ],
+          answer: 'C',
+          explanation: "Não bộ người học có cơ chế tự quyết định những cấu trúc nào được xử lý và tiếp thu tại mỗi thời điểm (internal syllabus)."
+        },
+        {
+          q_en: "A process that is mostly implicit means it happens...",
+          q_vi: "Một quá trình chủ yếu mang tính ngầm ẩn (implicit) có nghĩa là nó diễn ra...",
+          options: [
+            { key: 'A', text_en: "with conscious attention to rules.", text_vi: "với sự chú ý có ý thức vào quy tắc." },
+            { key: 'B', text_en: "by creating form-meaning connections.", text_vi: "thông qua việc tạo các kết nối hình thức - ý nghĩa." },
+            { key: 'C', text_en: "by focusing on grammatical accuracy.", text_vi: "bằng cách tập trung vào độ chính xác ngữ pháp." },
+            { key: 'D', text_en: "through explicit explanation.", text_vi: "thông qua giải thích tường minh." }
+          ],
+          answer: 'B',
+          explanation: "Tính chất ngầm ẩn thể hiện qua việc não tự động liên kết tín hiệu hình thức với ý nghĩa ngữ cảnh mà không cần phân tích quy tắc trừu tượng."
+        },
+        {
+          q_en: "What is NOT a characteristic of 'skill development'?",
+          q_vi: "Điều nào sau đây KHÔNG phải là đặc điểm của 'phát triển kỹ năng' (skill development)?",
+          options: [
+            { key: 'A', text_en: "Learning to talk.", text_vi: "Tập nói." },
+            { key: 'B', text_en: "Communicating.", text_vi: "Giao tiếp." },
+            { key: 'C', text_en: "Accessing the linguistic system.", text_vi: "Truy cập hệ thống ngôn ngữ." },
+            { key: 'D', text_en: "Building the linguistic system.", text_vi: "Xây dựng hệ thống ngôn ngữ." }
+          ],
+          answer: 'D',
+          explanation: "Xây dựng hệ thống ngôn ngữ là chức năng của sự tiếp thu thông qua Input, không phải của phát triển kỹ năng (skill development)."
+        },
+        {
+          q_en: "What builds the linguistic system?",
+          q_vi: "Yếu tố nào thực sự xây dựng nên hệ thống ngôn ngữ?",
+          options: [
+            { key: 'A', text_en: "Explicit rule learning.", text_vi: "Học quy tắc tường minh." },
+            { key: 'B', text_en: "Output and practice.", text_vi: "Đầu ra và luyện tập." },
+            { key: 'C', text_en: "Input.", text_vi: "Đầu vào (Input)." },
+            { key: 'D', text_en: "Conscious efforts.", text_vi: "Những nỗ lực có ý thức." }
+          ],
+          answer: 'C',
+          explanation: "Input là chất liệu duy nhất xây dựng hệ thống ngôn ngữ nội tại của người học."
+        },
+        {
+          q_en: "VanPatten's detailed definition states that communication involves the expression, interpretation, and negotiation of meaning with a purpose in a given...",
+          q_vi: "Định nghĩa chi tiết của VanPatten nêu rõ giao tiếp bao gồm việc biểu đạt, diễn giải và thương lượng ý nghĩa có mục đích trong một...",
+          options: [
+            { key: 'A', text_en: "textbook.", text_vi: "cuốn sách giáo khoa." },
+            { key: 'B', text_en: "linguistic form.", text_vi: "dạng thức ngôn ngữ." },
+            { key: 'C', text_en: "context.", text_vi: "ngữ cảnh (context)." },
+            { key: 'D', text_en: "classroom activity.", text_vi: "hoạt động lớp học." }
+          ],
+          answer: 'C',
+          explanation: "Định nghĩa đầy đủ: 'the expression, interpretation, and negotiation of meaning with a purpose in a given context'."
+        },
+        {
+          q_en: "The simplified working definition for the book states that communication is the...",
+          q_vi: "Định nghĩa thực hành tinh giản của cuốn sách nêu rõ giao tiếp là...",
+          options: [
+            { key: 'A', text_en: "accurate expression of learned forms.", text_vi: "sự biểu đạt chính xác các cấu trúc đã học." },
+            { key: 'B', text_en: "conscious application of language rules.", text_vi: "việc áp dụng có ý thức các quy tắc ngôn ngữ." },
+            { key: 'C', text_en: "purposeful interpretation and/or expression of meaning.", text_vi: "việc diễn giải và/hoặc biểu đạt ý nghĩa có mục đích." },
+            { key: 'D', text_en: "memorization and repetition of dialogue.", text_vi: "việc học thuộc và lặp lại đoạn hội thoại." }
+          ],
+          answer: 'C',
+          explanation: "Định nghĩa rút gọn: 'purposeful interpretation and/or expression of meaning' (sự diễn giải hoặc biểu đạt ý nghĩa có mục đích)."
+        },
+        {
+          q_en: "Communication's priority means it should determine the linguistic resources needed, not be an afterthought for...",
+          q_vi: "Ưu tiên của giao tiếp có nghĩa là nó phải quyết định nguồn lực ngôn ngữ cần thiết, chứ không phải là phần phụ thêm cho...",
+          options: [
+            { key: 'A', text_en: "creating new language.", text_vi: "tạo ra ngôn ngữ mới." },
+            { key: 'B', text_en: "practicing pre-taught grammar and vocabulary.", text_vi: "luyện tập ngữ pháp và từ vựng đã dạy sẵn." },
+            { key: 'C', text_en: "interpreting messages.", text_vi: "diễn giải thông điệp." },
+            { key: 'D', text_en: "expressing meaning.", text_vi: "biểu đạt ý nghĩa." }
+          ],
+          answer: 'B',
+          explanation: "Giao tiếp phải là mục tiêu định hướng nguồn lực ngôn ngữ cần dùng, chứ không phải cái cớ để luyện tập các điểm ngữ pháp đã học trước đó."
+        },
+        {
+          q_en: "According to VanPatten's view, asking students to role-play (e.g., as tourists) in the classroom often results in...",
+          q_vi: "Theo quan điểm của VanPatten, yêu cầu học sinh đóng vai (ví dụ: làm khách du lịch) trong lớp học thường dẫn đến...",
+          options: [
+            { key: 'A', text_en: "true communication.", text_vi: "giao tiếp thực sự." },
+            { key: 'B', text_en: "a purposeful negotiation of meaning.", text_vi: "thương lượng ý nghĩa có mục đích." },
+            { key: 'C', text_en: "mere language practice.", text_vi: "chỉ là luyện tập ngôn ngữ đơn thuần." },
+            { key: 'D', text_en: "learning about each other or the world.", text_vi: "học hỏi về nhau hoặc về thế giới." }
+          ],
+          answer: 'C',
+          explanation: "Vì học sinh biết rõ bối cảnh là giả định và đối phương không thực sự là người lạ, hoạt động đóng vai thường chỉ là 'mere language practice'."
+        },
+        {
+          q_en: "According to VanPatten, the purpose for classroom communication should be...",
+          q_vi: "Theo VanPatten, mục đích thực sự của giao tiếp trong lớp học nên là...",
+          options: [
+            { key: 'A', text_en: "to practice grammar points.", text_vi: "để luyện tập các điểm ngữ pháp." },
+            { key: 'B', text_en: "to learn about each other or the world.", text_vi: "để tìm hiểu về nhau hoặc về thế giới xung quanh." },
+            { key: 'C', text_en: "to finish the required textbook unit.", text_vi: "để hoàn thành bài học trong sách." },
+            { key: 'D', text_en: "to achieve perfect fluency.", text_vi: "để đạt được sự trôi chảy hoàn hảo." }
+          ],
+          answer: 'B',
+          explanation: "Mục đích giao tiếp chân thực trong lớp học là người học chia sẻ thông tin thật để tìm hiểu về bạn bè hoặc thế giới (learn about each other or the world)."
+        },
+        // Adding more key items up to full representation
+        {
+          q_en: "The two essential questions to determine if an activity is communication are: 'What information is being conveyed?' and...",
+          q_vi: "Hai câu hỏi cốt lõi để xác định một hoạt động có mang tính giao tiếp là: 'Thông tin nào đang được truyền tải?' và...",
+          options: [
+            { key: 'A', text_en: "What grammar tense is used?", text_vi: "Thì ngữ pháp nào đang được dùng?" },
+            { key: 'B', text_en: "How fast are students speaking?", text_vi: "Học sinh nói nhanh đến mức nào?" },
+            { key: 'C', text_en: "What will the audience do with the information?", text_vi: "Người nghe/người nhận sẽ làm gì với thông tin đó?" },
+            { key: 'D', text_en: "How many mistakes were corrected?", text_vi: "Bao nhiêu lỗi đã được sửa?" }
+          ],
+          answer: 'C',
+          explanation: "Hai câu hỏi vàng: 1. Thông tin gì được truyền đạt? 2. Người nhận sẽ làm gì với thông tin đó (What will the audience do with the information)?"
+        },
+        {
+          q_en: "Non-communicative activities, such as forming sentences from isolated clues, are not purposeful because...",
+          q_vi: "Các hoạt động phi giao tiếp như ghép câu từ các từ gợi ý không có mục đích vì...",
+          options: [
+            { key: 'A', text_en: "they are too difficult for the learners.", text_vi: "chúng quá khó đối với người học." },
+            { key: 'B', text_en: "the only reason for doing them is to practice a particular language form.", text_vi: "lý do duy nhất để làm là để luyện tập một dạng thức ngôn ngữ cụ thể." },
+            { key: 'C', text_en: "they take too much time.", text_vi: "chúng tốn quá nhiều thời gian." },
+            { key: 'D', text_en: "they do not involve any writing.", text_vi: "chúng không liên quan đến kỹ năng viết." }
+          ],
+          answer: 'B',
+          explanation: "Mục đích duy nhất chỉ là luyện tập máy móc hình thức ngữ pháp, không có mục tiêu truyền tải thông tin thực tế."
+        },
+        {
+          q_en: "Which of the following is an example of a Non-Communicative Activity?",
+          q_vi: "Ví dụ nào sau đây là một hoạt động Phi Giao Tiếp?",
+          options: [
+            { key: 'A', text_en: "Writing a blog post about your favorite band.", text_vi: "Viết bài blog về ban nhạc yêu thích của bạn." },
+            { key: 'B', text_en: "Discussing weekend plans with a partner.", text_vi: "Thảo luận kế hoạch cuối tuần với bạn học." },
+            { key: 'C', text_en: "Underlining all the plural nouns in a text.", text_vi: "Gạch chân tất cả các danh từ số nhiều trong văn bản." },
+            { key: 'D', text_en: "Reading an article to summarize the main idea.", text_vi: "Đọc một bài báo để tóm tắt ý chính." }
+          ],
+          answer: 'C',
+          explanation: "Gạch chân danh từ số nhiều là bài tập cơ học về hình thức, người học không cần hiểu nghĩa của văn bản vẫn có thể làm được."
+        },
+        {
+          q_en: "The Interpersonal Mode requires interaction that can be...",
+          q_vi: "Chế độ giao tiếp Liên nhân (Interpersonal Mode) đòi hỏi sự tương tác có thể là...",
+          options: [
+            { key: 'A', text_en: "written only.", text_vi: "chỉ bằng văn bản viết." },
+            { key: 'B', text_en: "prepared and memorized.", text_vi: "được chuẩn bị và học thuộc lòng." },
+            { key: 'C', text_en: "synchronous or asynchronous.", text_vi: "đồng bộ (thời gian thực) hoặc không đồng bộ (như email)." },
+            { key: 'D', text_en: "purely interpretive.", text_vi: "thuần túy mang tính diễn giải." }
+          ],
+          answer: 'C',
+          explanation: "Tương tác liên nhân có thể diễn ra đồng bộ (synchronous - mặt đối mặt, điện thoại) hoặc không đồng bộ (asynchronous - trao đổi email, tin nhắn)."
+        },
+        {
+          q_en: "Both L1 and L2+ learners exhibit U-shaped development, meaning they appear to master a form, then make errors, and then...",
+          q_vi: "Cả người học L1 và L2+ đều thể hiện tiến trình phát triển hình chữ U, nghĩa là ban đầu họ làm chủ một dạng thức, sau đó mắc lỗi, rồi sau đó...",
+          options: [
+            { key: 'A', text_en: "shift to a new language.", text_vi: "chuyển sang một ngôn ngữ mới." },
+            { key: 'B', text_en: "master it again.", text_vi: "làm chủ lại dạng thức đó một cách vững chắc." },
+            { key: 'C', text_en: "abandon the form entirely.", text_vi: "từ bỏ hoàn toàn dạng thức đó." },
+            { key: 'D', text_en: "receive explicit correction.", text_vi: "nhận sự sửa lỗi tường minh." }
+          ],
+          answer: 'B',
+          explanation: "Tiến trình hình chữ U: Ban đầu sao chép đúng -> Giai đoạn tái cấu trúc và khái quát hóa quá mức nên mắc lỗi -> Đạt đến sự làm chủ thực sự của hệ thống ngầm."
+        }
+      ];
+    }
+
+    function generateChapter2GoalsQuestions() {
+      return [
+        {
+          q_en: "Proficiency refers to a person's ability to use language in what kind of context?",
+          q_vi: "Năng lực giao tiếp (Proficiency) đề cập đến khả năng sử dụng ngôn ngữ của một người trong bối cảnh nào?",
+          options: [
+            { key: 'A', text_en: "A scripted or rehearsed classroom activity", text_vi: "Một hoạt động lớp học có kịch bản sẵn" },
+            { key: 'B', text_en: "A simulated, practiced environment", text_vi: "Một môi trường mô phỏng đã được luyện tập" },
+            { key: 'C', text_en: "A spontaneous, real-world situation", text_vi: "Một tình huống đời thực, mang tính tự phát và không chuẩn bị" },
+            { key: 'D', text_en: "An exam focused on grammar rules", text_vi: "Một bài thi tập trung vào quy tắc ngữ pháp" }
+          ],
+          answer: 'C',
+          explanation: "Proficiency phản ánh khả năng ngôn ngữ tự phát, không chuẩn bị trước trong các tình huống thực tế đời sống (spontaneous, real-world)."
+        },
+        {
+          q_en: "Performance describes what a learner can do after:",
+          q_vi: "Hiệu suất (Performance) mô tả điều người học có thể làm được sau khi:",
+          options: [
+            { key: 'A', text_en: "Achieving fluency without practice", text_vi: "Đạt sự lưu loát mà không cần luyện tập" },
+            { key: 'B', text_en: "Having the chance to practice similar communication activities", text_vi: "Có cơ hội luyện tập các hoạt động giao tiếp tương tự" },
+            { key: 'C', text_en: "Memorizing long vocabulary lists", text_vi: "Ghi nhớ danh sách từ vựng dài" },
+            { key: 'D', text_en: "Speaking with native speakers abroad", text_vi: "Nói chuyện với người bản ngữ ở nước ngoài" }
+          ],
+          answer: 'B',
+          explanation: "Performance thể hiện những gì người học thể hiện được trong môi trường lớp học sau khi đã được luyện tập các nhiệm vụ tương tự."
+        },
+        {
+          q_en: "A speaker who primarily uses memorized chunks and struggles to ask questions is typically at which proficiency level?",
+          q_vi: "Người nói chủ yếu sử dụng các cụm từ ghi nhớ (memorized chunks) và gặp khó khăn khi đặt câu hỏi thuộc cấp độ nào?",
+          options: [
+            { key: 'A', text_en: "Intermediate", text_vi: "Trung cấp (Intermediate)" },
+            { key: 'B', text_en: "Novice", text_vi: "Sơ cấp (Novice)" },
+            { key: 'C', text_en: "Advanced", text_vi: "Cao cấp (Advanced)" },
+            { key: 'D', text_en: "Superior", text_vi: "Thượng cấp (Superior)" }
+          ],
+          answer: 'B',
+          explanation: "Cấp độ Sơ cấp (Novice) theo chuẩn ACTFL đặc trưng bởi các mẩu câu ghi nhớ, phản ứng đơn giản và khó tự đặt câu hỏi."
+        },
+        {
+          q_en: "Which proficiency level is characterized by the ability to narrate and describe using past, present, and future tenses?",
+          q_vi: "Cấp độ năng lực nào có đặc trưng là khả năng kể chuyện và miêu tả ở cả ba thì: quá khứ, hiện tại và tương lai?",
+          options: [
+            { key: 'A', text_en: "Intermediate", text_vi: "Trung cấp (Intermediate)" },
+            { key: 'B', text_en: "Novice", text_vi: "Sơ cấp (Novice)" },
+            { key: 'C', text_en: "Advanced", text_vi: "Cao cấp (Advanced)" },
+            { key: 'D', text_en: "Superior", text_vi: "Thượng cấp (Superior)" }
+          ],
+          answer: 'C',
+          explanation: "Khả năng kể chuyện và miêu tả thành đoạn văn mạch lạc ở cả 3 khung thời gian (quá khứ, hiện tại, tương lai) là tiêu chuẩn vàng của cấp độ Cao cấp (Advanced)."
+        },
+        {
+          q_en: "The Integrated Performance Assessment (IPA) consists of three interconnected tasks. Which is NOT one of them?",
+          q_vi: "Đánh giá IPA gồm 3 nhiệm vụ liên kết. Nhiệm vụ nào KHÔNG nằm trong IPA?",
+          options: [
+            { key: 'A', text_en: "Interpretive", text_vi: "Diễn giải (Interpretive)" },
+            { key: 'B', text_en: "Interpersonal", text_vi: "Tương tác (Interpersonal)" },
+            { key: 'C', text_en: "Presentational", text_vi: "Trình bày (Presentational)" },
+            { key: 'D', text_en: "Mechanical", text_vi: "Cơ học (Mechanical)" }
+          ],
+          answer: 'D',
+          explanation: "IPA bao gồm 3 chế độ giao tiếp: Diễn giải (Interpretive), Tương tác (Interpersonal) và Trình bày (Presentational). Không có phần Mechanical."
+        }
+      ];
+    }
+
+    function generateChapter5Questions() {
+      return [
+        {
+          q_en: "What is the primary purpose of 'Output' in language learning?",
+          q_vi: "Mục đích chính của 'Output' (Đầu ra) trong việc học ngôn ngữ là gì?",
+          options: [
+            { key: 'A', text_en: "Memorizing vocabulary lists.", text_vi: "Học thuộc danh sách từ vựng." },
+            { key: 'B', text_en: "Producing the target language in order to express meaning.", text_vi: "Sản sinh ngôn ngữ đích nhằm truyền đạt ý nghĩa." },
+            { key: 'C', text_en: "Analyzing complex grammatical structures.", text_vi: "Phân tích cấu trúc ngữ pháp phức tạp." },
+            { key: 'D', text_en: "Listening to native speakers only.", text_vi: "Chỉ lắng nghe người bản ngữ nói." }
+          ],
+          answer: 'B',
+          explanation: "Output được định nghĩa là việc sản sinh ngôn ngữ đích với mục đích truyền đạt ý nghĩa thực sự (express meaning)."
+        },
+        {
+          q_en: "Output is distinguished from mere 'language production' by the requirement of:",
+          q_vi: "Output được phân biệt với 'sản sinh ngôn ngữ cơ học' bởi yêu cầu bắt buộc nào?",
+          options: [
+            { key: 'A', text_en: "Speaking at a fast pace.", text_vi: "Nói với tốc độ nhanh." },
+            { key: 'B', text_en: "Using complex vocabulary.", text_vi: "Sử dụng từ vựng nâng cao." },
+            { key: 'C', text_en: "The intention of conveying meaning.", text_vi: "Ý định truyền tải ý nghĩa (conveying meaning)." },
+            { key: 'D', text_en: "Writing lengthy essays.", text_vi: "Viết các bài luận dài." }
+          ],
+          answer: 'C',
+          explanation: "Chỉ phát âm âm thanh hoặc chép từ không phải là Output nếu thiếu đi ý định truyền đạt ý nghĩa (intention of conveying meaning)."
+        },
+        {
+          q_en: "The Output Hypothesis suggests that learning processes are engaged when learners are pushed to produce what kind of message?",
+          q_vi: "Giả thuyết Đầu ra cho rằng tiến trình học tập được kích hoạt khi người học bị đẩy vào thế phải sản sinh loại thông điệp nào?",
+          options: [
+            { key: 'A', text_en: "Very simple and basic.", text_vi: "Rất đơn giản và cơ bản." },
+            { key: 'B', text_en: "Accurate and meaningful.", text_vi: "Chính xác và có ý nghĩa (pushed output)." },
+            { key: 'C', text_en: "Perfectky fluent.", text_vi: "Hoàn hảo về độ trôi chảy." },
+            { key: 'D', text_en: "Translated from L1.", text_vi: "Được dịch từ tiếng mẹ đẻ." }
+          ],
+          answer: 'B',
+          explanation: "Swain đề xuất khái niệm 'pushed output' - người học được thúc đẩy tạo thông điệp vừa mang tính ý nghĩa vừa đòi hỏi độ chính xác ngôn ngữ."
+        },
+        {
+          q_en: "Who is the scholar that posited 'grammar correction has no place in writing classes and should be abandoned'?",
+          q_vi: "Học giả nào đã khẳng định 'sửa lỗi ngữ pháp không có chỗ đứng trong lớp dạy viết và nên bị loại bỏ hoàn toàn'?",
+          options: [
+            { key: 'A', text_en: "Ferris.", text_vi: "Dana Ferris." },
+            { key: 'B', text_en: "Krashen.", text_vi: "Stephen Krashen." },
+            { key: 'C', text_en: "Truscott.", text_vi: "John Truscott (1996)." },
+            { key: 'D', text_en: "Swain.", text_vi: "Merrill Swain." }
+          ],
+          answer: 'C',
+          explanation: "John Truscott nổi tiếng với luận điểm phản đối sửa lỗi ngữ pháp trong kỹ năng viết vì cho rằng nó gây hại và tạo ra sự học vờ (pseudo-learning)."
+        },
+        {
+          q_en: "Who asserted that 'effective error correction—that which is selective, prioritized, and clear—can and does help at least some student writers'?",
+          q_vi: "Ai đã khẳng định rằng 'việc sửa lỗi hiệu quả—có chọn lọc, ưu tiên và rõ ràng—thực sự giúp ích cho học sinh viết'?",
+          options: [
+            { key: 'A', text_en: "Truscott.", text_vi: "Truscott." },
+            { key: 'B', text_en: "Ferris.", text_vi: "Dana Ferris." },
+            { key: 'C', text_en: "Long.", text_vi: "Michael Long." },
+            { key: 'D', text_en: "VanPatten.", text_vi: "Bill VanPatten." }
+          ],
+          answer: 'B',
+          explanation: "Dana Ferris đã phản bác Truscott bằng các nghiên cứu thực nghiệm chứng minh phản hồi sửa lỗi có chọn lọc và rõ ràng đem lại tiến bộ rõ rệt."
+        }
+      ];
+    }
+
+    function generateChapter6Questions() {
+      return [
+        {
+          q_en: "Which of the following best describes 'synchronous' communication?",
+          q_vi: "Mô tả nào sau đây là chính xác nhất về giao tiếp 'đồng bộ' (synchronous)?",
+          options: [
+            { key: 'A', text_en: "Interaction that happens at different times (e.g., email).", text_vi: "Tương tác diễn ra ở các thời điểm khác nhau (ví dụ: email)." },
+            { key: 'B', text_en: "Interaction that happens in real-time where people interact simultaneously.", text_vi: "Tương tác diễn ra theo thời gian thực, mọi người giao tiếp đồng thời." },
+            { key: 'C', text_en: "Interaction that is strictly scripted.", text_vi: "Tương tác được viết sẵn theo kịch bản." },
+            { key: 'D', text_en: "Interaction that focuses only on listening.", text_vi: "Tương tác chỉ tập trung vào lắng nghe." }
+          ],
+          answer: 'B',
+          explanation: "Giao tiếp đồng bộ (synchronous) diễn ra tức thời trong thời gian thực như trò chuyện trực tiếp mặt đối mặt hoặc gọi điện thoại."
+        },
+        {
+          q_en: "Interpersonal communication does NOT occur when:",
+          q_vi: "Giao tiếp liên nhân (Interpersonal communication) KHÔNG diễn ra khi:",
+          options: [
+            { key: 'A', text_en: "There is a back-and-forth exchange.", text_vi: "Có sự trao đổi qua lại giữa hai bên." },
+            { key: 'B', text_en: "There is a lack of an information gap between interlocutors.", text_vi: "Thiếu khoảng trống thông tin giữa các bên đối thoại." },
+            { key: 'C', text_en: "The speakers have to negotiate meaning.", text_vi: "Người nói phải thương lượng ý nghĩa." },
+            { key: 'D', text_en: "The conversation is spontaneous.", text_vi: "Cuộc trò chuyện mang tính tự phát." }
+          ],
+          answer: 'B',
+          explanation: "Nếu không có khoảng trống thông tin (information gap) hoặc hai bên đã biết trước chính xác những gì người kia sẽ nói (như đọc kịch bản), thì không có giao tiếp liên nhân chân thực."
+        },
+        {
+          q_en: "According to Michael Long (1996), interaction connects input, internal learner capacities, output, and:",
+          q_vi: "Theo Michael Long (1996), tương tác kết nối đầu vào, năng lực bên trong của người học, đầu ra và yếu tố nào?",
+          options: [
+            { key: 'A', text_en: "Selective attention.", text_vi: "Sự chú ý có chọn lọc (selective attention)." },
+            { key: 'B', text_en: "Perfect accuracy.", text_vi: "Độ chính xác hoàn hảo." },
+            { key: 'C', text_en: "Written exams.", text_vi: "Các bài thi viết." },
+            { key: 'D', text_en: "Translation tools.", text_vi: "Các công cụ dịch thuật." }
+          ],
+          answer: 'A',
+          explanation: "Interaction Hypothesis: Tương tác tạo cơ hội thương lượng ý nghĩa, qua đó hướng 'selective attention' (sự chú ý có chọn lọc) của người học vào các dạng thức ngôn ngữ."
+        },
+        {
+          q_en: "What is a 'recast'?",
+          q_vi: "'Recast' (cải biến sửa lỗi) là gì?",
+          options: [
+            { key: 'A', text_en: "Asking the student to repeat the sentence.", text_vi: "Yêu cầu học sinh nhắc lại câu đó." },
+            { key: 'B', text_en: "A partial or total reformulation of the utterance into the correct form without disrupting the flow.", text_vi: "Sự cải biến một phần hoặc toàn bộ phát ngôn thành dạng đúng mà không làm ngắt mạch giao tiếp." },
+            { key: 'C', text_en: "Explaining the grammar rule explicitly.", text_vi: "Giải thích tường minh quy tắc ngữ pháp." },
+            { key: 'D', text_en: "Using rising intonation to signal an error.", text_vi: "Dùng ngữ điệu lên giọng để báo lỗi." }
+          ],
+          answer: 'B',
+          explanation: "Recast là kỹ thuật sửa lỗi tự nhiên, giáo viên nhắc lại phát ngôn của học sinh bằng dạng chuẩn xác (input-providing) mà không làm gián đoạn cuộc hội thoại."
+        },
+        {
+          q_en: "Recasts are considered which type of feedback?",
+          q_vi: "Recast được xếp vào loại phản hồi nào?",
+          options: [
+            { key: 'A', text_en: "Output-prompting.", text_vi: "Thúc đẩy đầu ra (Output-prompting)." },
+            { key: 'B', text_en: "Input-providing.", text_vi: "Cung cấp đầu vào (Input-providing)." },
+            { key: 'C', text_en: "Metalinguistic.", text_vi: "Siêu ngôn ngữ." },
+            { key: 'D', text_en: "Clarification.", text_vi: "Yêu cầu làm rõ." }
+          ],
+          answer: 'B',
+          explanation: "Recast cung cấp trực tiếp dạng thức đúng cho người học nghe (Input-providing), khác với Elicitation là ép người học tự sửa (Output-prompting)."
+        }
+      ];
+    }
+
+    function generateChapter3Questions() {
+      return [
+        {
+          q_en: "What is the definition of 'Input' in second language acquisition?",
+          q_vi: "'Input' trong tiếp thu ngôn ngữ thứ hai được định nghĩa là gì?",
+          options: [
+            { key: 'A', text_en: "Language produced by the learner to express meaning.", text_vi: "Ngôn ngữ do người học sản sinh để truyền đạt ý nghĩa." },
+            { key: 'B', text_en: "Language that learners hear or read with the aim of understanding its meaning.", text_vi: "Ngôn ngữ mà người học nghe hoặc đọc với mục đích hiểu được ý nghĩa." },
+            { key: 'C', text_en: "Explicit grammar rules memorized by the learner.", text_vi: "Các quy tắc ngữ pháp tường minh người học học thuộc." },
+            { key: 'D', text_en: "Language used only by native speakers.", text_vi: "Ngôn ngữ chỉ người bản ngữ sử dụng." }
+          ],
+          answer: 'B',
+          explanation: "Input là toàn bộ ngôn ngữ mà người học nghe hoặc đọc với mục đích tiếp nhận và hiểu ý nghĩa thông điệp."
+        },
+        {
+          q_en: "To support learning, Input must be both Comprehensible and what other quality?",
+          q_vi: "Để hỗ trợ việc học hiệu quả, Input phải vừa Dễ hiểu (Comprehensible) vừa mang phẩm chất nào?",
+          options: [
+            { key: 'A', text_en: "Fluent.", text_vi: "Lưu loát." },
+            { key: 'B', text_en: "Authentic.", text_vi: "Xác thực." },
+            { key: 'C', text_en: "Compelling.", text_vi: "Hấp dẫn/cuốn hút (Compelling)." },
+            { key: 'D', text_en: "Perfect.", text_vi: "Hoàn hảo." }
+          ],
+          answer: 'C',
+          explanation: "Tài liệu Chương 3 khẳng định Input phải vừa dễ hiểu vừa hấp dẫn (compelling - khiến người học thực sự muốn lắng nghe và chú ý)."
+        },
+        {
+          q_en: "According to Krashen's hypothesis, what happens when Input is too hard?",
+          q_vi: "Theo giả thuyết của Krashen, điều gì sẽ xảy ra khi Input quá khó đối với người học?",
+          options: [
+            { key: 'A', text_en: "Learners acquire language faster.", text_vi: "Người học tiếp thu ngôn ngữ nhanh hơn." },
+            { key: 'B', text_en: "Learners tend to rely on translation instead of building internal knowledge.", text_vi: "Người học có xu hướng dựa vào dịch thuật thay vì xây dựng hệ thống nội tại." },
+            { key: 'C', text_en: "Learners achieve native fluency.", text_vi: "Người học đạt độ lưu loát như người bản ngữ." },
+            { key: 'D', text_en: "Input processing stops completely.", text_vi: "Quá trình xử lý đầu vào dừng lại hoàn toàn." }
+          ],
+          answer: 'B',
+          explanation: "Khi input vượt quá xa trình độ hiện tại, người học bị quá tải và phải viện đến dịch thuật (translation) từng từ, làm cản trở việc hình thành hệ thống ngầm."
+        },
+        {
+          q_en: "In Structured Input exercises, learners process how many target forms at a time?",
+          q_vi: "Trong các bài tập Đầu Vào Có Cấu Trúc (Structured Input), người học xử lý bao nhiêu dạng thức mục tiêu tại một thời điểm?",
+          options: [
+            { key: 'A', text_en: "All forms available.", text_vi: "Tất cả các dạng thức có sẵn." },
+            { key: 'B', text_en: "Multiple forms.", text_vi: "Nhiều dạng thức đan xen." },
+            { key: 'C', text_en: "One target form.", text_vi: "Duy nhất một dạng thức mục tiêu." },
+            { key: 'D', text_en: "No specific forms.", text_vi: "Không có dạng thức cụ thể nào." }
+          ],
+          answer: 'C',
+          explanation: "Structured Input cô lập và chỉ cho người học xử lý duy nhất 1 dạng thức mục tiêu tại một thời điểm ('one target form at a time') để tối ưu hóa sự chú ý vào ý nghĩa."
+        }
+      ];
+    }
+
+    function generateChapter2DataQuestions() {
+      return [
+        {
+          q_en: "What is the primary characteristic of a Longitudinal Study in SLA?",
+          q_vi: "Đặc điểm cơ bản nhất của Nghiên Cứu Dài Hạn (Longitudinal Study) trong SLA là gì?",
+          options: [
+            { key: 'A', text_en: "Collecting data quickly from many learners at one time.", text_vi: "Thu thập dữ liệu nhanh từ nhiều người học tại một thời điểm." },
+            { key: 'B', text_en: "Following the same group of learners over an extended period.", text_vi: "Theo dõi cùng một nhóm người học qua một khoảng thời gian kéo dài." },
+            { key: 'C', text_en: "Relying entirely on controlled output tasks.", text_vi: "Dựa hoàn toàn vào các bài tập kiểm soát đầu ra." },
+            { key: 'D', text_en: "Analyzing standardized test scores only.", text_vi: "Chỉ phân tích điểm thi chuẩn hóa." }
+          ],
+          answer: 'B',
+          explanation: "Nghiên cứu dài hạn theo sát một hoặc một nhóm nhỏ người học qua nhiều tuần/tháng/năm để quan sát diễn biến phát triển thực tế của ngôn ngữ."
+        },
+        {
+          q_en: "A major disadvantage of longitudinal studies is that the results have limited generalizability because:",
+          q_vi: "Nhược điểm lớn của nghiên cứu dài hạn là khả năng khái quát hóa kết quả bị hạn chế vì:",
+          options: [
+            { key: 'A', text_en: "They are too fast to conduct.", text_vi: "Chúng được tiến hành quá nhanh." },
+            { key: 'B', text_en: "They typically involve a small number of subjects.", text_vi: "Chúng thường chỉ khảo sát số lượng đối tượng rất ít (thậm chí 1 ca)." },
+            { key: 'C', text_en: "The data is purely quantitative.", text_vi: "Dữ liệu hoàn toàn mang tính định lượng." },
+            { key: 'D', text_en: "They use multiple-choice questions.", text_vi: "Chúng sử dụng câu hỏi trắc nghiệm." }
+          ],
+          answer: 'B',
+          explanation: "Do tốn kém thời gian và công sức ghi âm/phiên âm, nghiên cứu dài hạn thường có cỡ mẫu rất nhỏ nên khó khái quát cho toàn bộ quần thể người học."
+        },
+        {
+          q_en: "What is the definition of a Learner Corpus?",
+          q_vi: "Định nghĩa chính xác của Ngân hàng ngữ liệu người học (Learner Corpus) là gì?",
+          options: [
+            { key: 'A', text_en: "A small handwritten collection of essays.", text_vi: "Một tập hợp nhỏ các bài luận viết tay." },
+            { key: 'B', text_en: "A database of language from native speakers.", text_vi: "Một cơ sở dữ liệu ngôn ngữ của người bản ngữ." },
+            { key: 'C', text_en: "A large, computer-searchable collection of real language from L2 learners.", text_vi: "Một tập hợp quy mô lớn, có thể tra cứu bằng máy tính về ngôn ngữ thực tế của người học L2." },
+            { key: 'D', text_en: "A grammar rule textbook.", text_vi: "Một cuốn sách giáo khoa quy tắc ngữ pháp." }
+          ],
+          answer: 'C',
+          explanation: "Learner Corpus là kho dữ liệu điện tử khổng lồ lưu trữ ngôn ngữ thực tế (nói hoặc viết) của người học L2, giúp các nhà nghiên cứu tra cứu và phân tích bằng máy tính."
+        },
+        {
+          q_en: "The main purpose of Replication in SLA research is to:",
+          q_vi: "Mục đích chính của việc Nghiên Cứu Lặp Lại (Replication) là nhằm:",
+          options: [
+            { key: 'A', text_en: "Analyze data using new statistical software.", text_vi: "Phân tích dữ liệu bằng phần mềm mới." },
+            { key: 'B', text_en: "Confirm reliability and stability of original findings and test generalizability.", text_vi: "Xác nhận độ tin cậy, tính ổn định của phát hiện ban đầu và kiểm tra khả năng khái quát hóa." },
+            { key: 'C', text_en: "Replace all qualitative studies.", text_vi: "Thay thế toàn bộ nghiên cứu định tính." },
+            { key: 'D', text_en: "Create a new language corpus from scratch.", text_vi: "Tạo ra một ngữ liệu mới hoàn toàn." }
+          ],
+          answer: 'B',
+          explanation: "Lặp lại nghiên cứu nhằm kiểm tra xem kết quả trước đó có phải do ngẫu nhiên hay không và kiểm chứng xem lý thuyết có áp dụng được rộng rãi hay không."
+        }
+      ];
+    }
+
+    function generateIntroQuestions() {
+      return [
+        {
+          q_en: "What is the primary focus of the discipline of Second Language Acquisition (SLA)?",
+          q_vi: "Trọng tâm nghiên cứu hàng đầu của ngành Thụ đắc Ngôn ngữ thứ hai (SLA) là gì?",
+          options: [
+            { key: 'A', text_en: "Developing new teaching methods.", text_vi: "Phát triển các phương pháp giảng dạy mới." },
+            { key: 'B', text_en: "The study of how second languages are learned.", text_vi: "Nghiên cứu về cách các ngôn ngữ thứ hai được tiếp thu/học." },
+            { key: 'C', text_en: "Comparing L1 and L2 vocabularies.", text_vi: "So sánh từ vựng giữa L1 và L2." },
+            { key: 'D', text_en: "Writing prescriptive grammars.", text_vi: "Biên soạn ngữ pháp quy phạm." }
+          ],
+          answer: 'B',
+          explanation: "Mục tiêu cốt lõi của SLA là tìm hiểu cơ chế và tiến trình học ngôn ngữ thứ hai của con người ('the study of how second languages are learned')."
+        },
+        {
+          q_en: "The main goal of the field of SLA is to understand the learning process, and it is considered separate from which related field?",
+          q_vi: "Mục tiêu chính của SLA là tìm hiểu tiến trình học tập, và nó được xem là tách biệt với lĩnh vực liên quan nào?",
+          options: [
+            { key: 'A', text_en: "Sociolinguistics.", text_vi: "Xã hội học ngôn ngữ." },
+            { key: 'B', text_en: "Language Pedagogy.", text_vi: "Phương pháp giảng dạy ngôn ngữ (Language Pedagogy)." },
+            { key: 'C', text_en: "Psycholinguistics.", text_vi: "Tâm lý ngôn ngữ học." },
+            { key: 'D', text_en: "Discourse Analysis.", text_vi: "Phân tích diễn ngôn." }
+          ],
+          answer: 'B',
+          explanation: "Nghiên cứu SLA tách biệt với Phương pháp giảng dạy (Pedagogy); SLA giải thích cách học, còn Pedagogy phát triển cách dạy."
+        },
+        {
+          q_en: "What is the term for the unique and dynamic language system created by an L2 learner?",
+          q_vi: "Thuật ngữ chỉ hệ thống ngôn ngữ độc đáo và mang tính động do người học L2 tự kiến tạo là gì?",
+          options: [
+            { key: 'A', text_en: "Target Language (TL).", text_vi: "Ngôn ngữ đích (Target Language)." },
+            { key: 'B', text_en: "Native Language (NL).", text_vi: "Ngôn ngữ mẹ đẻ (Native Language)." },
+            { key: 'C', text_en: "Interlanguage (IL).", text_vi: "Liên ngôn ngữ (Interlanguage)." },
+            { key: 'D', text_en: "Prescriptive Grammar.", text_vi: "Ngữ pháp quy phạm." }
+          ],
+          answer: 'C',
+          explanation: "Interlanguage (Liên ngôn ngữ) là hệ thống trung gian được kiến tạo độc lập bởi người học trong quá trình thụ đắc ngôn ngữ đích."
+        },
+        {
+          q_en: "Which component of language is defined as the study of meaning?",
+          q_vi: "Thành tố ngôn ngữ nào được định nghĩa là ngành nghiên cứu về ý nghĩa (meaning)?",
+          options: [
+            { key: 'A', text_en: "Pragmatics.", text_vi: "Ngữ dụng học." },
+            { key: 'B', text_en: "Syntax.", text_vi: "Cú pháp học." },
+            { key: 'C', text_en: "Semantics.", text_vi: "Ngữ nghĩa học (Semantics)." },
+            { key: 'D', text_en: "Phonology.", text_vi: "Ngữ âm học." }
+          ],
+          answer: 'C',
+          explanation: "Semantics (Ngữ nghĩa học) nghiên cứu về ý nghĩa của từ ngữ, sự quy chiếu và mối quan hệ ngữ nghĩa trong câu."
+        },
+        {
+          q_en: "Understanding that the phone phrase 'Is Samuel there?' is a request to speak with Samuel requires knowledge of:",
+          q_vi: "Việc hiểu rằng câu hỏi qua điện thoại 'Samuel có ở đó không?' là một lời đề nghị muốn nói chuyện với Samuel đòi hỏi kiến thức về:",
+          options: [
+            { key: 'A', text_en: "Syntax.", text_vi: "Cú pháp học." },
+            { key: 'B', text_en: "Morphology.", text_vi: "Hình thái học." },
+            { key: 'C', text_en: "Pragmatics.", text_vi: "Ngữ dụng học (Pragmatics)." },
+            { key: 'D', text_en: "Phonology.", text_vi: "Ngữ âm học." }
+          ],
+          answer: 'C',
+          explanation: "Pragmatics nghiên cứu cách ngôn ngữ được sử dụng trong ngữ cảnh xã hội, bao gồm việc giải mã hàm ý hành vi ngôn từ (speech acts)."
+        }
+      ];
+    }
+
+    function generateChapter4Questions() {
+      return [
+        {
+          q_en: "What two skills are encompassed by 'interpretive proficiency'?",
+          q_vi: "'Năng lực diễn giải' (interpretive proficiency) bao gồm hai kỹ năng nào?",
+          options: [
+            { key: 'A', text_en: "Speaking and Writing.", text_vi: "Nói và Viết." },
+            { key: 'B', text_en: "Reading and Listening comprehension.", text_vi: "Đọc và Nghe hiểu." },
+            { key: 'C', text_en: "Grammar and Vocabulary.", text_vi: "Ngữ pháp và Từ vựng." },
+            { key: 'D', text_en: "Pronunciation and Fluency.", text_vi: "Phát âm và Lưu loát." }
+          ],
+          answer: 'B',
+          explanation: "Interpretive proficiency bao gồm hai kỹ năng tiếp nhận cốt lõi: Đọc hiểu và Nghe hiểu (reading and listening comprehension)."
+        },
+        {
+          q_en: "Which type of processing involves applying background knowledge and expectations to anticipate and infer ideas?",
+          q_vi: "Loại xử lý nào liên quan đến việc áp dụng kiến thức nền và dự đoán để suy luận ý tưởng?",
+          options: [
+            { key: 'A', text_en: "Bottom-up processing.", text_vi: "Xử lý từ dưới lên (Bottom-up)." },
+            { key: 'B', text_en: "Local strategy.", text_vi: "Chiến lược cục bộ (Local)." },
+            { key: 'C', text_en: "Top-down processing.", text_vi: "Xử lý từ trên xuống (Top-down)." },
+            { key: 'D', text_en: "Micro strategy.", text_vi: "Chiến lược vi mô." }
+          ],
+          answer: 'C',
+          explanation: "Top-down processing (chiến lược toàn cục / macro) tận dụng kiến thức nền, ngữ cảnh văn bản và kinh nghiệm cá nhân để giải mã ý nghĩa tổng thể."
+        },
+        {
+          q_en: "The structure of interpretive lessons is divided into how many phases?",
+          q_vi: "Cấu trúc của một bài học giao tiếp diễn giải được chia làm mấy giai đoạn?",
+          options: [
+            { key: 'A', text_en: "Two.", text_vi: "Hai giai đoạn." },
+            { key: 'B', text_en: "Three.", text_vi: "Ba giai đoạn (Pre, While, Post)." },
+            { key: 'C', text_en: "Four.", text_vi: "Bốn giai đoạn." },
+            { key: 'D', text_en: "Five.", text_vi: "Năm giai đoạn." }
+          ],
+          answer: 'B',
+          explanation: "Gồm 3 giai đoạn tiêu chuẩn: Trước khi đọc/nghe (Pre), Trong khi đọc/nghe (While), và Sau khi đọc/nghe (Post)."
+        }
+      ];
+    }
+
+    /* ============================================================== */
+    /* 4. UI TAB NAVIGATION CONTROLLER                                 */
+    /* ============================================================== */
+    function switchTab(tabId) {
+      currentTab = tabId;
+      const sections = ['roadmap', 'glossary', 'exams', 'history'];
+      sections.forEach(s => {
+        const el = document.getElementById('section-' + s);
+        const btn = document.getElementById('nav-' + s);
+        if (s === tabId) {
+          el.classList.remove('hidden');
+          btn.classList.add('active');
+        } else {
+          el.classList.add('hidden');
+          btn.classList.remove('active');
+        }
+      });
+      // Refresh lucide icons
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    }
+
+    /* ============================================================== */
+    /* 5. ROADMAP RENDERER & INTERACTIVE LOGIC                         */
+    /* ============================================================== */
+    function renderRoadmap(filterStage = 'all') {
+      const container = document.getElementById('roadmap-timeline');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const items = filterStage === 'all' ? ROADMAP_DATA : ROADMAP_DATA.filter(item => item.id === filterStage);
+
+      items.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-xl border border-slate-200 p-5 sm:p-6 shadow-xs transition hover:border-slate-300 space-y-4";
+        
+        let takeawaysHtml = item.keyTakeaways.map(t => `
+          <li class="flex items-start space-x-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+            <span>${t}</span>
+          </li>
+        `).join('');
+
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div>
+              <span class="text-xs font-bold text-blue-700 uppercase tracking-wider">${item.phase}</span>
+              <h3 class="text-base sm:text-lg font-bold text-slate-900">${item.title}</h3>
+              <p class="text-xs text-slate-500 mt-0.5">${item.subtitle}</p>
+            </div>
+            <button onclick="directStartExam('${item.targetExamId}')" class="px-3.5 py-1.5 rounded-lg bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200 text-xs font-semibold flex items-center space-x-1.5 self-start sm:self-auto transition">
+              <i data-lucide="play-circle" class="w-4 h-4"></i>
+              <span>Luyện đề chặng này</span>
+            </button>
+          </div>
+          <div class="space-y-2">
+            <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Trọng tâm lý thuyết & Điểm chạm thực tiễn:</h4>
+            <ul class="space-y-2">
+              ${takeawaysHtml}
+            </ul>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function filterRoadmap(stage) {
+      document.querySelectorAll('.roadmap-filter-btn').forEach(btn => {
+        if (btn.dataset.stage === stage) {
+          btn.className = "roadmap-filter-btn px-3 py-1.5 rounded-lg bg-slate-900 text-white font-medium whitespace-nowrap";
+        } else {
+          btn.className = "roadmap-filter-btn px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium whitespace-nowrap";
+        }
+      });
+      renderRoadmap(stage);
+    }
+
+    /* ============================================================== */
+    /* 6. GLOSSARY RENDERER & SEARCH                                   */
+    /* ============================================================== */
+    function renderGlossary(filtered = GLOSSARY_DATA) {
+      const container = document.getElementById('glossary-grid');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-12 text-center text-slate-400">
+            <i data-lucide="search-x" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
+            <p>Không tìm thấy thuật ngữ nào phù hợp với từ khóa.</p>
+          </div>
+        `;
+        if (window.lucide) window.lucide.createIcons();
+        return;
+      }
+
+      filtered.forEach(item => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-xl border border-slate-200 p-4 shadow-xs hover:border-blue-300 transition space-y-2 flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="font-bold text-slate-900 text-sm leading-snug">${item.term}</h3>
+              ${item.acronym !== '–' ? `<span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-mono text-[11px] font-bold shrink-0">${item.acronym}</span>` : ''}
+            </div>
+            <p class="text-xs font-semibold text-blue-800 mt-1">${item.viName}</p>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">${item.definition}</p>
+          </div>
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+            <span class="capitalize">Nhóm: ${item.category}</span>
+            <span class="text-slate-400 font-mono">SLA Ref.</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function filterGlossary() {
+      const query = (document.getElementById('glossary-search')?.value || '').toLowerCase().trim();
+      const cat = document.getElementById('glossary-category')?.value || 'all';
+
+      const results = GLOSSARY_DATA.filter(item => {
+        const matchesQuery = item.term.toLowerCase().includes(query) ||
+                             item.acronym.toLowerCase().includes(query) ||
+                             item.viName.toLowerCase().includes(query) ||
+                             item.definition.toLowerCase().includes(query);
+        const matchesCat = (cat === 'all') || (item.category === cat);
+        return matchesQuery && matchesCat;
+      });
+
+      renderGlossary(results);
+    }
+
+    /* ============================================================== */
+    /* 7. EXAM HUB & BRIEFING CONTROLLER (STRICT CLOCK MECHANICS)      */
+    /* ============================================================== */
+    function renderExamsGrid(filter = 'all') {
+      const container = document.getElementById('exams-grid');
+      if (!container) return;
+      container.innerHTML = '';
+
+      let list = EXAMS_CATALOG;
+      if (filter === '60') list = EXAMS_CATALOG.filter(e => e.questionCount === 60);
+      else if (filter === '50') list = EXAMS_CATALOG.filter(e => e.questionCount === 50);
+      else if (filter === '45') list = EXAMS_CATALOG.filter(e => e.questionCount === 45);
+      else if (filter === '40') list = EXAMS_CATALOG.filter(e => e.questionCount === 40);
+      else if (filter === 'short') list = EXAMS_CATALOG.filter(e => e.questionCount < 40);
+
+      list.forEach(exam => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:shadow-sm hover:border-slate-300 transition flex flex-col justify-between space-y-4";
+        card.innerHTML = `
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded text-[11px] font-semibold ${exam.badgeColor}">${exam.chapter}</span>
+              <span class="text-xs font-mono font-medium text-slate-500">${exam.durationMinutes} Phút</span>
+            </div>
+            <h3 class="font-bold text-slate-900 text-base leading-snug">${exam.title}</h3>
+            <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed">${exam.desc}</p>
+          </div>
+
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+            <div class="flex items-center space-x-1.5 text-xs text-slate-500 font-mono-numbers">
+              <i data-lucide="check-square" class="w-3.5 h-3.5 text-slate-400"></i>
+              <span>${exam.questionCount} Câu hỏi</span>
+            </div>
+            <button onclick="openExamBriefing('${exam.id}')" class="px-3.5 py-1.5 rounded-lg bg-blue-800 hover:bg-blue-900 text-white text-xs font-semibold flex items-center space-x-1 transition shadow-2xs">
+              <span>Vào thi thử</span>
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function filterExams(type) {
+      document.querySelectorAll('.exam-filter-chip').forEach(btn => {
+        if (btn.dataset.filter === type) {
+          btn.className = "exam-filter-chip px-3 py-1 rounded-md text-xs font-medium bg-slate-900 text-white";
+        } else {
+          btn.className = "exam-filter-chip px-3 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200";
+        }
+      });
+      renderExamsGrid(type);
+    }
+
+    function directStartExam(examId) {
+      switchTab('exams');
+      openExamBriefing(examId);
+    }
+
+    /**
+     * MỞ MÀN HÌNH BRIEFING / THÔNG TIN ĐỀ THI
+     * TUYỆT ĐỐI KHÔNG CHẠY TIMER TẠI ĐÂY!
+     */
+    function openExamBriefing(examId) {
+      const exam = EXAMS_CATALOG.find(e => e.id === examId);
+      if (!exam) return;
+
+      currentExam = exam;
+
+      // STOP any existing timer completely
+      if (examTimerInterval) {
+        clearInterval(examTimerInterval);
+        examTimerInterval = null;
+      }
+      isExamActive = false;
+
+      // Populate Briefing UI
+      document.getElementById('briefing-chapter-badge').innerText = exam.chapter;
+      document.getElementById('briefing-title').innerText = exam.title;
+      document.getElementById('briefing-desc').innerText = exam.desc;
+      document.getElementById('briefing-qcount').innerText = `${exam.questionCount} Câu`;
+      document.getElementById('briefing-duration').innerText = `${exam.durationMinutes} Phút`;
+
+      // Show Briefing, hide others
+      document.getElementById('exam-view-hub').classList.add('hidden');
+      document.getElementById('exam-view-briefing').classList.remove('hidden');
+      document.getElementById('exam-view-taking').classList.add('hidden');
+      document.getElementById('exam-view-result').classList.add('hidden');
+
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function exitToHub() {
+      if (examTimerInterval) {
+        clearInterval(examTimerInterval);
+        examTimerInterval = null;
+      }
+      isExamActive = false;
+
+      document.getElementById('exam-view-hub').classList.remove('hidden');
+      document.getElementById('exam-view-briefing').classList.add('hidden');
+      document.getElementById('exam-view-taking').classList.add('hidden');
+      document.getElementById('exam-view-result').classList.add('hidden');
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    /**
+     * BẮT ĐẦU LÀM BÀI: CHỈ BÂY GIỜ ĐỒNG HỒ MỚI THỰC SỰ BẮT ĐẦU ĐẾM NGƯỢC!
+     */
+    function startActiveExam() {
+      if (!currentExam) return;
+
+      isExamActive = true;
+      currentQuestionIdx = 0;
+      userAnswers = {};
+      flaggedQuestions.clear();
+
+      // Calculation: 1 minute = 60 seconds per question
+      initialDurationSec = currentExam.questionCount * 60;
+      timeRemaining = initialDurationSec;
+
+      // Update UI Views
+      document.getElementById('exam-view-hub').classList.add('hidden');
+      document.getElementById('exam-view-briefing').classList.add('hidden');
+      document.getElementById('exam-view-taking').classList.remove('hidden');
+      document.getElementById('exam-view-result').classList.add('hidden');
+
+      document.getElementById('live-exam-title').innerText = currentExam.title;
+
+      // Initialize Timer Display immediately
+      updateTimerDisplay();
+
+      // Start tick countdown
+      if (examTimerInterval) clearInterval(examTimerInterval);
+      examTimerInterval = setInterval(handleExamTick, 1000);
+
+      // Render Question & Palette
+      renderCurrentQuestion();
+      renderPalette();
+
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function handleExamTick() {
+      if (!isExamActive) return;
+      timeRemaining--;
+      updateTimerDisplay();
+
+      // Check if time up
+      if (timeRemaining <= 0) {
+        clearInterval(examTimerInterval);
+        examTimerInterval = null;
+        isExamActive = false;
+        alert("Hết giờ làm bài! Hệ thống đang tự động thu bài và chấm điểm.");
+        executeSubmitExam();
+      }
+    }
+
+    function updateTimerDisplay() {
+      const timerDisplay = document.getElementById('timer-display');
+      const timerBadge = document.getElementById('timer-badge');
+      if (!timerDisplay) return;
+
+      const mins = Math.floor(timeRemaining / 60);
+      const secs = timeRemaining % 60;
+      const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      timerDisplay.innerText = formatted;
+
+      // Visual warning when time is low
+      if (timeRemaining <= 300 && timeRemaining > 60) {
+        // Less than 5 mins
+        timerBadge.className = "flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-amber-600 text-white font-mono-numbers font-bold text-base sm:text-lg border border-amber-500 shadow-inner";
+      } else if (timeRemaining <= 60) {
+        // Less than 1 min
+        timerBadge.className = "flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-red-600 text-white font-mono-numbers font-bold text-base sm:text-lg border border-red-500 shadow-inner animate-timer-alert";
+      } else {
+        timerBadge.className = "flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-white font-mono-numbers font-bold text-base sm:text-lg border border-slate-700 shadow-inner";
+      }
+    }
+
+    /* ============================================================== */
+    /* 8. LIVE EXAM QUESTION DISPLAY & INTERACTION                    */
+    /* ============================================================== */
+    function renderCurrentQuestion() {
+      if (!currentExam) return;
+      const q = currentExam.questions[currentQuestionIdx];
+      const total = currentExam.questions.length;
+
+      document.getElementById('live-exam-qindicator').innerText = `${currentQuestionIdx + 1} / ${total}`;
+      document.getElementById('current-q-badge').innerText = `CÂU ${currentQuestionIdx + 1}`;
+      document.getElementById('current-q-topic').innerText = currentExam.chapter;
+
+      // Question text
+      document.getElementById('question-text-en').innerText = q.q_en;
+      document.getElementById('question-translation-box').innerText = q.q_vi;
+      document.getElementById('question-translation-box').style.display = isVietnameseVisible ? 'block' : 'none';
+
+      // Options
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+
+      q.options.forEach(opt => {
+        const isSelected = userAnswers[currentQuestionIdx] === opt.key;
+        const optCard = document.createElement('div');
+        optCard.className = `option-card p-3.5 sm:p-4 rounded-xl border border-slate-200 cursor-pointer flex items-start space-x-3 ${isSelected ? 'selected' : 'bg-white'}`;
+        optCard.onclick = () => selectOption(opt.key);
+
+        optCard.innerHTML = `
+          <div class="w-6 h-6 rounded-full border flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold font-mono ${isSelected ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300 text-slate-600 bg-slate-50'}">
+            ${opt.key}
+          </div>
+          <div class="space-y-0.5">
+            <p class="text-xs sm:text-sm text-slate-900 font-medium">${opt.text_en}</p>
+            ${isVietnameseVisible ? `<p class="text-[11px] sm:text-xs text-slate-500 italic">${opt.text_vi}</p>` : ''}
+          </div>
+        `;
+        optionsContainer.appendChild(optCard);
+      });
+
+      // Update flag button label
+      const flagBtn = document.getElementById('flag-btn');
+      const isFlagged = flaggedQuestions.has(currentQuestionIdx);
+      if (isFlagged) {
+        flagBtn.className = "px-2.5 py-1 rounded text-xs border border-amber-300 bg-amber-50 text-amber-800 flex items-center space-x-1";
+        document.getElementById('flag-btn-label').innerText = "Đã gắn cờ";
+      } else {
+        flagBtn.className = "px-2.5 py-1 rounded text-xs border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center space-x-1";
+        document.getElementById('flag-btn-label').innerText = "Gắn cờ xem lại";
+      }
+
+      // Prev / Next button state
+      document.getElementById('btn-prev').disabled = (currentQuestionIdx === 0);
+      document.getElementById('btn-prev').classList.toggle('opacity-50', currentQuestionIdx === 0);
+      document.getElementById('btn-next').disabled = (currentQuestionIdx === total - 1);
+      document.getElementById('btn-next').classList.toggle('opacity-50', currentQuestionIdx === total - 1);
+
+      // Update answered count
+      const answeredCount = Object.keys(userAnswers).length;
+      document.getElementById('live-answered-count').innerText = answeredCount;
+      document.getElementById('palette-stats').innerText = `${answeredCount}/${total}`;
+
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function selectOption(key) {
+      userAnswers[currentQuestionIdx] = key;
+      renderCurrentQuestion();
+      renderPalette();
+    }
+
+    function clearCurrentAnswer() {
+      delete userAnswers[currentQuestionIdx];
+      renderCurrentQuestion();
+      renderPalette();
+    }
+
+    function toggleFlagCurrentQuestion() {
+      if (flaggedQuestions.has(currentQuestionIdx)) {
+        flaggedQuestions.delete(currentQuestionIdx);
+      } else {
+        flaggedQuestions.add(currentQuestionIdx);
+      }
+      renderCurrentQuestion();
+      renderPalette();
+    }
+
+    function toggleVietnameseTranslation() {
+      isVietnameseVisible = !isVietnameseVisible;
+      document.getElementById('trans-toggle-label').innerText = isVietnameseVisible ? "Ẩn tiếng Việt" : "Hiện tiếng Việt";
+      renderCurrentQuestion();
+    }
+
+    function nextQuestion() {
+      if (currentExam && currentQuestionIdx < currentExam.questions.length - 1) {
+        currentQuestionIdx++;
+        renderCurrentQuestion();
+        renderPalette();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQuestionIdx > 0) {
+        currentQuestionIdx--;
+        renderCurrentQuestion();
+        renderPalette();
+      }
+    }
+
+    function jumpToQuestion(idx) {
+      currentQuestionIdx = idx;
+      renderCurrentQuestion();
+      renderPalette();
+    }
+
+    function renderPalette() {
+      const grid = document.getElementById('palette-grid');
+      if (!grid || !currentExam) return;
+      grid.innerHTML = '';
+
+      currentExam.questions.forEach((_, idx) => {
+        const isCurrent = idx === currentQuestionIdx;
+        const isAnswered = userAnswers[idx] !== undefined;
+        const isFlagged = flaggedQuestions.has(idx);
+
+        const pill = document.createElement('div');
+        let classes = "q-pill font-mono ";
+        if (isCurrent) classes += "current ";
+        if (isAnswered) classes += "answered ";
+        else classes += "unanswered ";
+        if (isFlagged) classes += "flagged ";
+
+        pill.className = classes;
+        pill.innerText = idx + 1;
+        pill.onclick = () => jumpToQuestion(idx);
+        grid.appendChild(pill);
+      });
+    }
+
+    /* ============================================================== */
+    /* 9. SUBMIT CONFIRMATION & SCORING SYSTEM                         */
+    /* ============================================================== */
+    function confirmSubmitExam() {
+      if (!currentExam) return;
+      const total = currentExam.questions.length;
+      const answered = Object.keys(userAnswers).length;
+      const unanswered = total - answered;
+      const flagged = flaggedQuestions.size;
+
+      document.getElementById('modal-stat-total').innerText = `${total} câu`;
+      document.getElementById('modal-stat-answered').innerText = `${answered} câu`;
+      document.getElementById('modal-stat-unanswered').innerText = `${unanswered} câu`;
+      document.getElementById('modal-stat-flagged').innerText = `${flagged} câu`;
+
+      document.getElementById('submit-confirm-modal').classList.remove('hidden');
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function closeSubmitModal() {
+      document.getElementById('submit-confirm-modal').classList.add('hidden');
+    }
+
+    function executeSubmitExam() {
+      closeSubmitModal();
+      if (examTimerInterval) {
+        clearInterval(examTimerInterval);
+        examTimerInterval = null;
+      }
+      isExamActive = false;
+
+      // Calculate score
+      const total = currentExam.questions.length;
+      let correct = 0;
+      let wrong = 0;
+      let skipped = 0;
+
+      currentExam.questions.forEach((q, idx) => {
+        const userChoice = userAnswers[idx];
+        if (!userChoice) {
+          skipped++;
+        } else if (userChoice === q.answer) {
+          correct++;
+        } else {
+          wrong++;
+        }
+      });
+
+      const score10 = Number(((correct / total) * 10).toFixed(1));
+      const percentage = Math.round((correct / total) * 100);
+      const timeSpentSec = initialDurationSec - Math.max(0, timeRemaining);
+      const timeSpentFormatted = formatTimeSeconds(timeSpentSec);
+
+      // Populate Result View
+      document.getElementById('result-exam-tag').innerText = currentExam.chapter;
+      document.getElementById('result-exam-title').innerText = currentExam.title;
+      document.getElementById('result-time-stamp').innerText = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('result-elapsed-time').innerText = timeSpentFormatted;
+
+      document.getElementById('result-score-10').innerText = score10.toFixed(1);
+      document.getElementById('result-percentage').innerText = `${percentage}%`;
+      document.getElementById('result-fraction').innerText = `${correct}/${total} câu`;
+
+      document.getElementById('result-correct-count').innerText = correct;
+      document.getElementById('result-wrong-count').innerText = wrong;
+      document.getElementById('result-skipped-count').innerText = skipped;
+
+      // Evaluation verdict
+      let verdict = 'Cần ôn tập thêm';
+      if (score10 >= 8.5) verdict = 'Xuất sắc (Advanced/Superior)';
+      else if (score10 >= 7.0) verdict = 'Khá Tốt (Intermediate High)';
+      else if (score10 >= 5.0) verdict = 'Đạt yêu cầu cơ bản';
+      document.getElementById('result-verdict').innerText = verdict;
+
+      // Save to exam history
+      const historyEntry = {
+        date: new Date().toLocaleDateString('vi-VN') + ' ' + new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        title: currentExam.title,
+        questionsCount: total,
+        timeSpent: timeSpentFormatted,
+        correctCount: correct,
+        score: score10,
+        verdict: verdict
+      };
+      examHistory.unshift(historyEntry);
+      persistAppState();
+      renderHistoryTable();
+
+      // Switch to Result View
+      document.getElementById('exam-view-taking').classList.add('hidden');
+      document.getElementById('exam-view-result').classList.remove('hidden');
+
+      // Render Question Review List
+      currentReviewFilter = 'all';
+      renderReviewQuestions();
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function formatTimeSeconds(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${m}p ${s}s`;
+    }
+
+    function retakeCurrentExam() {
+      if (currentExam) {
+        startActiveExam();
+      }
+    }
+
+    /* ============================================================== */
+    /* 10. DETAILED REVIEW & BILINGUAL EXPLANATIONS                   */
+    /* ============================================================== */
+    function filterReviewQuestions(type) {
+      currentReviewFilter = type;
+      ['all', 'wrong', 'flagged'].forEach(t => {
+        const btn = document.getElementById('rf-' + t);
+        if (t === type) {
+          btn.className = "review-filter-btn px-2.5 py-1 rounded text-xs font-medium bg-slate-900 text-white";
+        } else {
+          btn.className = "review-filter-btn px-2.5 py-1 rounded text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200";
+        }
+      });
+      renderReviewQuestions();
+    }
+
+    function renderReviewQuestions() {
+      const container = document.getElementById('review-questions-list');
+      if (!container || !currentExam) return;
+      container.innerHTML = '';
+
+      currentExam.questions.forEach((q, idx) => {
+        const userChoice = userAnswers[idx];
+        const isCorrect = userChoice === q.answer;
+        const isSkipped = !userChoice;
+        const isFlagged = flaggedQuestions.has(idx);
+
+        if (currentReviewFilter === 'wrong' && isCorrect) return;
+        if (currentReviewFilter === 'flagged' && !isFlagged) return;
+
+        const card = document.createElement('div');
+        card.className = `p-5 sm:p-6 rounded-xl border ${isCorrect ? 'border-emerald-200 bg-emerald-50/20' : (isSkipped ? 'border-amber-200 bg-amber-50/20' : 'border-red-200 bg-red-50/20')} shadow-xs space-y-4`;
+
+        let statusBadge = '';
+        if (isCorrect) {
+          statusBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 flex items-center space-x-1"><i data-lucide="check" class="w-3 h-3"></i><span>ĐÚNG</span></span>`;
+        } else if (isSkipped) {
+          statusBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800 flex items-center space-x-1"><i data-lucide="alert-circle" class="w-3 h-3"></i><span>CHƯA LÀM</span></span>`;
+        } else {
+          statusBadge = `<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-red-100 text-red-800 flex items-center space-x-1"><i data-lucide="x" class="w-3 h-3"></i><span>SAI</span></span>`;
+        }
+
+        // Render options with clear feedback
+        let optionsHtml = q.options.map(opt => {
+          const isThisCorrect = opt.key === q.answer;
+          const isThisUserChoice = opt.key === userChoice;
+
+          let optBorder = 'border-slate-200 bg-white';
+          let optBadge = '';
+
+          if (isThisCorrect) {
+            optBorder = 'border-emerald-500 bg-emerald-50 font-medium';
+            optBadge = `<span class="ml-auto text-[11px] font-bold text-emerald-700 font-mono">✓ ĐÁP ÁN ĐÚNG</span>`;
+          } else if (isThisUserChoice && !isThisCorrect) {
+            optBorder = 'border-red-500 bg-red-50';
+            optBadge = `<span class="ml-auto text-[11px] font-bold text-red-700 font-mono">✕ BẠN ĐÃ CHỌN</span>`;
+          }
+
+          return `
+            <div class="p-3 rounded-lg border ${optBorder} flex items-start space-x-2.5 text-xs sm:text-sm">
+              <span class="w-5 h-5 rounded-full border border-slate-300 flex items-center justify-center font-bold text-xs shrink-0 font-mono ${isThisCorrect ? 'bg-emerald-700 text-white border-emerald-700' : (isThisUserChoice ? 'bg-red-700 text-white border-red-700' : 'bg-slate-100 text-slate-700')}">${opt.key}</span>
+              <div class="space-y-0.5 flex-1">
+                <span class="text-slate-900">${opt.text_en}</span>
+                <p class="text-[11px] text-slate-500 italic">${opt.text_vi}</p>
+              </div>
+              ${optBadge}
+            </div>
+          `;
+        }).join('');
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between border-b border-slate-200/60 pb-3">
+            <div class="flex items-center space-x-2">
+              <span class="font-bold font-mono text-xs text-slate-700">CÂU ${idx + 1}</span>
+              ${statusBadge}
+              ${isFlagged ? `<span class="text-amber-600 text-xs flex items-center space-x-0.5"><i data-lucide="flag" class="w-3 h-3"></i><span>Đã gắn cờ</span></span>` : ''}
+            </div>
+            <span class="text-xs text-slate-500 font-mono">Đáp án chuẩn: <strong class="text-emerald-700 font-bold">${q.answer}</strong></span>
+          </div>
+
+          <div class="space-y-1">
+            <p class="text-sm sm:text-base font-semibold text-slate-900 leading-snug">${q.q_en}</p>
+            <p class="text-xs text-slate-600 italic bg-white/70 p-2 rounded border border-slate-100">${q.q_vi}</p>
+          </div>
+
+          <div class="space-y-2">
+            ${optionsHtml}
+          </div>
+
+          <!-- Explanation Box -->
+          <div class="p-4 rounded-lg bg-blue-50/70 border border-blue-200 text-xs sm:text-sm space-y-1 text-slate-800">
+            <div class="flex items-center space-x-1.5 font-bold text-blue-900">
+              <i data-lucide="info" class="w-4 h-4 text-blue-700"></i>
+              <span>GIẢI THÍCH CHI TIẾT & CƠ SỞ LÝ THUYẾT:</span>
+            </div>
+            <p class="leading-relaxed text-slate-700 pl-5">
+              ${q.explanation}
+            </p>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    /* ============================================================== */
+    /* 11. STATE PERSISTENCE & HISTORY MANAGEMENT                      */
+    /* ============================================================== */
+    async function initAppState() {
+      try {
+        const raw = localStorage.getItem('sla-mastery-hub-state');
+        const savedState = raw ? JSON.parse(raw) : null;
+        if (savedState && Array.isArray(savedState.history)) {
+          examHistory = savedState.history;
+        }
+      } catch (err) {
+        console.warn('Could not load saved state from shim:', err);
+      }
+      renderHistoryTable();
+    }
+
+    async function persistAppState() {
+      try {
+        localStorage.setItem('sla-mastery-hub-state', JSON.stringify({
+          history: examHistory,
+          lastActive: new Date().toISOString()
+        }));
+      } catch (err) {
+        console.warn('Could not persist app state via shim:', err);
+      }
+    }
+
+    function renderHistoryTable() {
+      const tbody = document.getElementById('history-table-body');
+      const totalCount = document.getElementById('stat-total-attempts');
+      const avgScore = document.getElementById('stat-avg-score');
+      const bestScore = document.getElementById('stat-best-score');
+      const countText = document.getElementById('history-count-text');
+
+      if (!tbody) return;
+
+      const n = examHistory.length;
+      totalCount.innerText = n;
+      countText.innerText = `${n} bản ghi`;
+
+      if (n === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400">Chưa có bài thi nào được hoàn thành. Hãy vào "Phòng thi thử" để bắt đầu!</td></tr>`;
+        avgScore.innerText = '0.0';
+        bestScore.innerText = '0.0';
+        return;
+      }
+
+      let sum = 0;
+      let max = 0;
+      tbody.innerHTML = '';
+
+      examHistory.forEach(item => {
+        sum += item.score;
+        if (item.score > max) max = item.score;
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 text-slate-800";
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono text-xs text-slate-500">${item.date}</td>
+          <td class="py-3 px-4 font-medium text-slate-900">${item.title}</td>
+          <td class="py-3 px-4 text-center font-mono-numbers">${item.questionsCount}</td>
+          <td class="py-3 px-4 text-center font-mono-numbers">${item.timeSpent}</td>
+          <td class="py-3 px-4 text-center font-mono-numbers text-emerald-700 font-bold">${item.correctCount} / ${item.questionsCount}</td>
+          <td class="py-3 px-4 text-center font-mono-numbers font-bold text-blue-800">${item.score.toFixed(1)}</td>
+          <td class="py-3 px-4 text-right"><span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700">${item.verdict}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      avgScore.innerText = (sum / n).toFixed(1);
+      bestScore.innerText = max.toFixed(1);
+    }
+
+    function clearHistory() {
+      if (confirm("Bạn có chắc chắn muốn xóa toàn bộ lịch sử thi đã lưu?")) {
+        examHistory = [];
+        persistAppState();
+        renderHistoryTable();
+      }
+    }
+
+    /* ============================================================== */
+    /* 12. EXAM COUNTDOWN & STUDY CHECKLIST LOGIC                     */
+    /* ============================================================== */
+    function initCountdown() {
+      // 10h30 ngày 21/12/2026
+      const targetDate = new Date("2026-12-21T10:30:00").getTime();
+      
+      const updateTimer = () => {
+        const now = new Date().getTime();
+        const distance = targetDate - now;
+
+        if (distance < 0) {
+          document.getElementById("cd-days").innerText = "00";
+          document.getElementById("cd-hours").innerText = "00";
+          document.getElementById("cd-mins").innerText = "00";
+          document.getElementById("cd-secs").innerText = "00";
+          return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        document.getElementById("cd-days").innerText = String(days).padStart(2, '0');
+        document.getElementById("cd-hours").innerText = String(hours).padStart(2, '0');
+        document.getElementById("cd-mins").innerText = String(minutes).padStart(2, '0');
+        document.getElementById("cd-secs").innerText = String(seconds).padStart(2, '0');
+      };
+      
+      updateTimer();
+      setInterval(updateTimer, 1000);
+    }
+
+    const CHECKLIST_DATA = [
+      { id: 'task-1', text: 'Ôn tập Chương 1: Nguyên tắc Cốt lõi SLA' },
+      { id: 'task-2', text: 'Ôn tập Chương 2: Mục tiêu & Đánh giá IPA' },
+      { id: 'task-3', text: 'Ôn tập Chương 3: Input & Scaffolding' },
+      { id: 'task-4', text: 'Ôn tập Chương 4: Năng lực Diễn giải' },
+      { id: 'task-5', text: 'Ôn tập Chương 5 & 6: Output & TBLT' },
+      { id: 'task-6', text: 'Hoàn thành 8 đề thi thử chuẩn hóa' },
+      { id: 'task-7', text: 'Ghi nhớ các thuật ngữ (Glossary) quan trọng' }
+    ];
+
+    let savedChecklist = JSON.parse(localStorage.getItem('sla-checklist')) || {};
+
+    function renderChecklist() {
+      const container = document.getElementById('checklist-container');
+      if(!container) return;
+      container.innerHTML = '';
+      let completedCount = 0;
+
+      CHECKLIST_DATA.forEach((task) => {
+        const isChecked = savedChecklist[task.id] || false;
+        if (isChecked) completedCount++;
+
+        const taskEl = document.createElement('label');
+        taskEl.className = "flex items-start space-x-3 p-3 rounded-lg border border-slate-100 bg-slate-50 hover:bg-slate-100 cursor-pointer transition";
+        taskEl.innerHTML = `
+          <div class="relative flex items-start mt-0.5">
+            <input type="checkbox" class="peer sr-only" onchange="toggleChecklist('${task.id}')" ${isChecked ? 'checked' : ''}>
+            <div class="w-5 h-5 border-2 border-slate-300 rounded peer-checked:bg-blue-600 peer-checked:border-blue-600 transition flex items-center justify-center">
+              <i data-lucide="check" class="w-3 h-3 text-white ${isChecked ? 'opacity-100' : 'opacity-0'}"></i>
+            </div>
+          </div>
+          <span class="text-sm text-slate-700 ${isChecked ? 'line-through text-slate-400' : 'font-medium'} transition-all">${task.text}</span>
+        `;
+        container.appendChild(taskEl);
+      });
+
+      // Cập nhật thanh tiến trình
+      const pct = Math.round((completedCount / CHECKLIST_DATA.length) * 100);
+      document.getElementById('checklist-progress-text').innerText = pct + '%';
+      document.getElementById('checklist-progress-bar').style.width = pct + '%';
+
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function toggleChecklist(id) {
+      savedChecklist[id] = !savedChecklist[id];
+      localStorage.setItem('sla-checklist', JSON.stringify(savedChecklist));
+      renderChecklist();
+    }
+
+    /* ============================================================== */
+    /* INITIALIZATION ON PAGE LOAD                                    */
+    /* ============================================================== */
+    window.addEventListener('DOMContentLoaded', async () => {
+      // 1. Initialize Views
+      renderRoadmap('all');
+      renderGlossary();
+      renderExamsGrid('all');
+
+      // 2. Load Persisted State
+      await initAppState();
+
+      // 3. Initialize Countdown & Checklist
+      initCountdown();
+      renderChecklist();
+
+      // 4. Lucide Icons
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+  </script>
+<script>
+  (function () {
+    var API_URL = 'https://script.google.com/macros/s/AKfycbw4xuxHWuZNRGLVggt6to--eOSnh1VdPQNPn-ysso-4V1DW2B-75-pYd-SdZF-GNJl6KQ/exec';
+    var KEY = 'sla-hub-unlocked';
+    var gate = document.getElementById('gate');
+    var input = document.getElementById('gate-input');
+    var err = document.getElementById('gate-error');
+    var btn = document.getElementById('gate-btn');
+
+    function unlock() { gate.style.display = 'none'; document.documentElement.style.overflow = ''; }
+    function lock() { gate.style.display = 'flex'; document.documentElement.style.overflow = 'hidden'; }
+
+    async function check() {
+      var code = input.value.trim().toUpperCase();
+      if (!code) return;
+
+      err.style.color = '#64748b';
+      err.textContent = 'Đang kiểm tra mã...';
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+
+      try {
+        var res = await fetch(API_URL + '?code=' + encodeURIComponent(code));
+        var data = await res.json();
+
+        if (data.status === 'success') {
+          try { localStorage.setItem(KEY, code); } catch (e) {}
+          unlock();
+        } else {
+          err.style.color = '#b91c1c';
+          err.textContent = data.message || 'Code đã được sử dụng';
+          input.select();
+        }
+      } catch (e) {
+        err.style.color = '#b91c1c';
+        err.textContent = 'Lỗi kết nối, vui lòng thử lại.';
+      } finally {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }
+    }
+
+    lock();
+    try { if (localStorage.getItem(KEY)) unlock(); } catch (e) {}
+    btn.addEventListener('click', check);
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') check(); });
+  })();
+</script>
+</body>
+</html>
